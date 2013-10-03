@@ -1,0 +1,45 @@
+\name{kitagawa-constants}
+\alias{constants}
+\alias{kitagawa-constants}
+\title{Access to constants used by default}
+\usage{
+  constants(do.str = TRUE)
+}
+\arguments{
+  \item{do.str}{logical; should the structure be printed?}
+}
+\value{
+  The constants, invisibly.
+}
+\description{
+  The response of an aquifer depends on its mechanical and
+  hydrological properties; if these are not known or
+  specified, these constants are used.
+}
+\details{
+  The function \code{\link{constants}} shows the structure
+  of (optionally), and returns the assumed constants, which
+  do \emph{not} reside in the namespace.
+
+  \subsection{Values}{ \describe{ \item{For water:
+  }{Density and bulk modulus} \item{Gravity: }{Standard
+  gravitational acceleration at 6371km radius (Earth)}
+  \item{Conversions: }{Degrees to radians} } }
+}
+\examples{
+constants()
+constants(FALSE) # returns invisibly
+}
+\seealso{
+  \code{\link{well_response}} and
+  \code{\link{open_well_response}}
+
+  \code{\link{kitagawa-package}}
+
+  Other ConstantsCalculators:
+  \code{\link{alpha_constants}},
+  \code{\link{alpha_constants.default}},
+  \code{\link{omega_constants}},
+  \code{\link{omega_constants.default}}
+}
+

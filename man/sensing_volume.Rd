@@ -58,9 +58,11 @@ Ls <- 9.14     # m, length of screened region (30ft)
 sensing_volume(Rc, Lc, Rs, Ls) # m**3, ~= 1.8
 }
 \author{
-  Andrew Barbour <andy.barbour@gmail.com>
+  A. J. Barbour <andy.barbour@gmail.com>
 }
 \seealso{
-  \code{\link{well_response}}, \code{\link{kitplot}}
+  \code{\link{well_response}}
+
+  Other utilities: \code{\link{omega_norm}}
 }
 
