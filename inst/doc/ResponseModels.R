@@ -1,23 +1,20 @@
-
-## ----eval=TRUE, echo=FALSE-----------------------------------------------
+## ----eval=TRUE, echo=FALSE-----------------------------------------
 library(knitr)
 options(width=69)
-opts_chunk$set(tidy = TRUE, size="small")
+knitr::opts_chunk$set(tidy = TRUE, size="small")
 
-
-## ----eval=TRUE, echo=TRUE, label=PRELIM----------------------------------
+## ----eval=TRUE, echo=TRUE, label=PRELIM----------------------------
 library(RColorBrewer)
 Set1 <- brewer.pal(8, "Set1")
-library(signal)
+library(signal, warn.conflicts=FALSE)
 library(kitagawa)
 
-
-## ----eval=TRUE, echo=TRUE, label=PARAMS1---------------------------------
-S. <- 1e-5		# Storativity [nondimensional]
-T. <- 1e-4		# Transmissivity [m**2 / s]
-D. <- T./S.		# Diffusivity [m**2 / s]
-Ta <- 50			# Aquifer thickness [m] #100
-Hw <- z <- 50	# Depth to water table [m] #10
+## ----eval=TRUE, echo=TRUE, label=PARAMS1---------------------------
+S. <- 1e-5    # Storativity [nondimensional]
+T. <- 1e-4    # Transmissivity [m**2 / s]
+D. <- T./S.   # Diffusivity [m**2 / s]
+Ta <- 50      # Aquifer thickness [m] #100
+Hw <- z <- 50 # Depth to water table [m] #10
 
 # Using ANO1 stats from Kit Tbl 1
 Rc. <- 0.075		# Radius of cased portion of well [m]
@@ -35,8 +32,7 @@ rhog <- 9.81*1000
 Ku. <- 40e9		# Bulk modulus [Pascals]
 B. <- 0.5		# Skemptons ratio [nondimensional]
 
-
-## ----eval=TRUE, echo=TRUE, label=PARAMS2---------------------------------
+## ----eval=TRUE, echo=TRUE, label=PARAMS2---------------------------
 # Frequencies
 Q <- 10**seq(-5,2,by=0.05)					# [nondimensional]
 lQ <- log10(Q)
@@ -52,14 +48,12 @@ Phase <- function(Z){
 asP <- FALSE
 ZasP <- FALSE
 
-
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=KITRESP----
 wrsp <- well_response(omega, T.=T., S.=S., Vw.=Vw., Rs.=Rs., Ku.=Ku., B.=B., Avs=1, Aw=1, as.pressure=asP)
 plot(wrsp) # uses plot.wrsp method
 crsp <- wrsp[["Response"]][,2]	# Complex response
 kGain <- Mod(crsp)/Ku./B.			# Amplitude (or Gain)
 kP <- Phase(crsp)				# Phase
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=7, fig.width=5.5, label=KITRESPFIG----
 par(mfrow=c(2,1), 
@@ -86,7 +80,6 @@ lines(lQ, kP$uPhs*180/pi, type="l", lwd=2)
 log10_ticks()
 mtext("(b) Phase", adj=0)
 
-
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=COOPERRESP----
 wrsp <- open_well_response(omega, T.=T., S.=S., Ta=Ta, Hw=Hw, 
 	model = "cooper", as.pressure=ZasP)
@@ -94,7 +87,6 @@ plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
 cGain <- Mod(crsp)
 cP <- Phase(crsp)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=7, fig.width=5.5, label=COOPERRESPFIG----
 par(mfrow=c(2,1), 
@@ -121,14 +113,12 @@ lines(lQ, cP$uPhs*180/pi, type="l", lty=3)
 log10_ticks()
 mtext("(b) Phase", adj=0)
 
-
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=HSIEHRESP----
 wrsp <- open_well_response(omega, T.=T., S.=S.,  Ta=Ta, Hw=Hw, model = "hsieh", as.pressure=ZasP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
 hGain <- Mod(crsp)
 hP <- Phase(crsp)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=7, fig.width=5.5, label=HSIEHRESPFIG----
 par(mfrow=c(2,1), 
@@ -155,14 +145,12 @@ lines(lQ, hP$uPhs*180/pi, type="l", lwd=2)
 log10_ticks()
 mtext("(b) Phase", adj=0)
 
-
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=LIURESP----
 wrsp <- open_well_response(omega, T.=T., S.=S.,  Ta=Ta, Hw=Hw, model = "liu", as.pressure=ZasP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
 lGain <- Mod(crsp)
 lP <- Phase(crsp)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=7, fig.width=5.5, label=LIURESPFIG----
 par(mfrow=c(2,1), 
@@ -189,14 +177,12 @@ lines(lQ, lP$uPhs*180/pi, type="l", lwd=2)
 log10_ticks()
 mtext("(b) Phase", adj=0)
 
-
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=ROJRESP----
 wrsp <- open_well_response(omega, T.=T., S.=S., z=z, model = "rojstaczer", as.pressure=asP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
 rGain <- Mod(crsp)
 rP <- Phase(crsp)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=6, fig.width=5.5, label=ROJRESPFIG----
 par(mfrow=c(2,1), 
@@ -224,7 +210,6 @@ abline(h=-180, col="grey")
 lines(lQ, rP$uPhs*180/pi, type="l", lwd=2)
 log10_ticks()
 mtext("(b) Phase", adj=0)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=6, fig.width=5.5, label=ALLRESPFIG----
 par(mfrow=c(2,1), 
@@ -268,7 +253,6 @@ lines(lQ, kP$uPhs*180/pi-180, lwd=2, col=Set1[1])
 lines(lQ, rP$uPhs*180/pi-180, lwd=2, col=Set1[2])
 log10_ticks()
 mtext("(b) Anti-Phase", adj=0)
-
 
 ## ----eval=TRUE, echo=FALSE, fig.height=6, fig.width=5.5, label=ALLORESPFIG----
 par(mfrow=c(2,1), 
@@ -314,5 +298,4 @@ lines(lQ, lP$Phs*180/pi, lwd=2, col=Set1[2])
 lines(lQ, hP$Phs*180/pi, lwd=2, col=Set1[3])
 log10_ticks()
 mtext("(b) Phase", adj=0)
-
 

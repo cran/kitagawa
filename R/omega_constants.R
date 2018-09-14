@@ -55,7 +55,7 @@
 #'   \code{ctype="diffusivity_time"}, set
 #'   \code{D.} or \code{S., T.}.
 #'
-#' @return Values of the constant repesented by \code{c.type} for the given
+#' @return Values of the constant represented by \code{c.type} for the given
 #' parameters
 #' 
 #' @author A. J. Barbour <andy.barbour@@gmail.com>
@@ -80,7 +80,7 @@ function(omega=0, c.type=c("alpha","diffusivity_time"), ...) UseMethod("omega_co
 
 #' @rdname omega_constants
 #' @method omega_constants default
-#' @S3method omega_constants default
+#' @export
 omega_constants.default <-
   function(omega=0, c.type=c("alpha","diffusivity_time"), ...){
     #

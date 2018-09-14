@@ -62,40 +62,33 @@ NULL
 
 #' @rdname wrsp-methods
 #' @aliases as.data.frame.wrsp
-#' @method as.data.frame wrsp
-#' @S3method as.data.frame wrsp
+#' @export
 as.data.frame.wrsp <- function(x, ...){
   WR <- x[["Response"]]
   df <- as.data.frame(WR)
-  #names(df) <- "n.wrsp"
   return(df)
 }
 #' @rdname wrsp-methods
 #' @aliases data.frame.wrsp
-#' @method data.frame wrsp
-#' @S3method data.frame wrsp
+#' @export
 data.frame.wrsp <- as.data.frame.wrsp
 
 #' @rdname wrsp-methods
 #' @aliases print.wrsp
-#' @method print wrsp
-#' @S3method print wrsp
+#' @export
 print.wrsp <- function(x, n=3, ...){
-  stopifnot(is.wrsp(x))
   message("Sealed well response:")
-  WR <- x[["Response"]]
-  WR <- as.data.frame(WR)
+  WR <- as.data.frame(x)
   print(head(WR, n))
   message("\t...")
   print(tail(WR, n))
+  return(invisible(x))
 }
 
 #' @rdname wrsp-methods
 #' @aliases summary.wrsp
-#' @method summary wrsp
-#' @S3method summary wrsp
+#' @export
 summary.wrsp <- function(object, ...){
-  stopifnot(is.wrsp(object))
   WR <- object[["Response"]]
   toret <- summary.default(WR)
   class(toret) <- "summary.wrsp"
@@ -104,8 +97,7 @@ summary.wrsp <- function(object, ...){
 
 #' @rdname wrsp-methods
 #' @aliases print.summary.wrsp
-#' @method print summary.wrsp
-#' @S3method print summary.wrsp
+#' @export
 print.summary.wrsp <- function(x, ...){
   message("Sealed well response summary:")
   print.summaryDefault(x)
@@ -113,10 +105,8 @@ print.summary.wrsp <- function(x, ...){
 
 #' @rdname wrsp-methods
 #' @aliases lines.wrsp
-#' @method lines wrsp
-#' @S3method lines wrsp
+#' @export
 lines.wrsp <- function(x, series=c("amp","phs"), ...){
-  stopifnot(is.wrsp(x))
   series <- match.arg(series)
   WR <- x[["Response"]]
   x <- WR[,1]
@@ -127,10 +117,8 @@ lines.wrsp <- function(x, series=c("amp","phs"), ...){
 
 #' @rdname wrsp-methods
 #' @aliases points.wrsp
-#' @method points wrsp
-#' @S3method points wrsp
+#' @export
 points.wrsp <- function(x, series=c("amp","phs"), pch="+", ...){
-  stopifnot(is.wrsp(x))
   series <- match.arg(series)
   WR <- x[["Response"]]
   x <- WR[,1]
@@ -141,13 +129,10 @@ points.wrsp <- function(x, series=c("amp","phs"), pch="+", ...){
 
 #' @rdname wrsp-methods
 #' @aliases plot.wrsp
-#' @method plot wrsp
-#' @S3method plot wrsp
+#' @export
 plot.wrsp <- function(x, 
                       xlims=c(-3,1), 
                       ylims=list(amp=NULL, phs=185*c(-1,1)), logamp=TRUE, ...){
-  #
-  stopifnot(is.wrsp(x))
   WR <- x[["Response"]]
   au <- x[["Response.units"]]
   fu <- x[["Omega"]][["Units"]]
@@ -209,8 +194,7 @@ plot.wrsp <- function(x,
 kitplot <- function(x, ...) UseMethod("kitplot")
 #' @rdname wrsp-methods
 #' @aliases kitplot.wrsp
-#' @method kitplot wrsp
-#' @S3method kitplot wrsp
+#' @export
 kitplot.wrsp <- plot.wrsp
 
 #' @title Generic methods for objects with class \code{'owrsp'}.
@@ -283,40 +267,33 @@ NULL
 
 #' @rdname owrsp-methods
 #' @aliases as.data.frame.owrsp
-#' @method as.data.frame owrsp
-#' @S3method as.data.frame owrsp
+#' @export
 as.data.frame.owrsp <- function(x, ...){
   WR <- x[["Response"]]
   df <- as.data.frame(WR)
-  #names(df) <- "n.owrsp"
   return(df)
 }
 #' @rdname owrsp-methods
 #' @aliases data.frame.owrsp
-#' @method data.frame owrsp
-#' @S3method data.frame owrsp
+#' @export
 data.frame.owrsp <- as.data.frame.owrsp
 
 #' @rdname owrsp-methods
 #' @aliases print.owrsp
-#' @method print owrsp
-#' @S3method print owrsp
+#' @export
 print.owrsp <- function(x, n=3, ...){
-  stopifnot(is.owrsp(x))
   message("Open well response:")
-  WR <- x[["Response"]]
-  WR <- as.data.frame(WR)
+  WR <- as.data.frame(x)
   print(head(WR, n))
   message("\t...")
   print(tail(WR, n))
+  return(invisible(x))
 }
 
 #' @rdname owrsp-methods
 #' @aliases summary.owrsp
-#' @method summary owrsp
-#' @S3method summary owrsp
+#' @export
 summary.owrsp <- function(object, ...){
-  stopifnot(is.owrsp(object))
   WR <- object[["Response"]]
   toret <- summary.default(WR)
   class(toret) <- "summary.owrsp"
@@ -325,8 +302,7 @@ summary.owrsp <- function(object, ...){
 
 #' @rdname owrsp-methods
 #' @aliases print.summary.owrsp
-#' @method print summary.owrsp
-#' @S3method print summary.owrsp
+#' @export
 print.summary.owrsp <- function(x, ...){
   message("Open well response summary:")
   print.summaryDefault(x)
@@ -334,10 +310,8 @@ print.summary.owrsp <- function(x, ...){
 
 #' @rdname owrsp-methods
 #' @aliases lines.owrsp
-#' @method lines owrsp
-#' @S3method lines owrsp
+#' @export
 lines.owrsp <- function(x, series=c("amp","phs"), ...){
-  stopifnot(is.owrsp(x))
   series <- match.arg(series)
   WR <- x[["Response"]]
   x <- WR[,1]
@@ -348,10 +322,8 @@ lines.owrsp <- function(x, series=c("amp","phs"), ...){
 
 #' @rdname owrsp-methods
 #' @aliases points.owrsp
-#' @method points owrsp
-#' @S3method points owrsp
+#' @export
 points.owrsp <- function(x, series=c("amp","phs"), pch="+", ...){
-  stopifnot(is.owrsp(x))
   series <- match.arg(series)
   WR <- x[["Response"]]
   x <- WR[,1]
@@ -362,13 +334,11 @@ points.owrsp <- function(x, series=c("amp","phs"), pch="+", ...){
 
 #' @rdname owrsp-methods
 #' @aliases plot.owrsp
-#' @method plot owrsp
-#' @S3method plot owrsp
+#' @export
 plot.owrsp <- function(x, 
                       xlims=c(-3,1), 
                       ylims=list(amp=NULL, phs=185*c(-1,1)), logamp=TRUE, ...){
   #
-  stopifnot(is.owrsp(x))
   WR <- x[["Response"]]
   au <- x[["Response.units"]]
   fu <- x[["Omega"]][["Units"]]
