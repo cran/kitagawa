@@ -1,3 +1,9 @@
+## ----include=FALSE------------------------------------------------------------
+library(knitr)
+opts_chunk$set(
+concordance=TRUE
+)
+
 ## ----eval=TRUE, echo=FALSE-----------------------------------------
 library(knitr)
 options(width=69)
@@ -168,14 +174,119 @@ log10_ticks()
 mtext("Open Well Response (LIU): Harmonic Strain", font=2, line=1.5)
 mtext("(a) Gain", adj=0)
 par(mar=c(4,4,1.1,2))
-plot(lQ, lP$Phs*180/pi, type="l", lty=3, #ylim=c(-190, -130), 
+plot(lQ, lP$Phs*180/pi, type="l", lwd = 2, #ylim=c(-190, -130), 
 	 xaxt="n",
      ylab=expression(Z ~ "rel." ~ H),
      xlab=expression("Dimensionless frequency," ~ Q ==z^2 * omega / 2 * D  ))
 abline(h=-180, col="grey")
-lines(lQ, lP$uPhs*180/pi, type="l", lwd=2)
+lines(lQ, lP$uPhs*180/pi, type="l", lty=3)
 log10_ticks()
 mtext("(b) Phase", adj=0)
+
+## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=WANGRESP----
+wrsp <- open_well_response(omega, T.=T., S.=S., leak = 1e-8,
+                           model = "wang", as.pressure=asP)
+plot(wrsp)
+crsp <- wrsp[["Response"]][,2]
+rGain <- Mod(crsp)
+rP <- Phase(crsp)
+
+## ----eval=TRUE, echo=TRUE, label=WANGRESPDAT-----------------------
+Transmiss <- c(1e0, 1e-2, 1e-4, 1e-6, 1e-8)
+Storativ  <- c(1e-2, 1e-4, 1e-6, 1e-8)
+omeg      <- 1.9322736 / 86400 # M2 in Hz
+leak      <- 10^seq(-11, -3, 0.2)
+
+## ----eval=TRUE, echo=FALSE, fig.height=4.7, fig.width=4, label=WANGRESPFIG----
+
+pt.cex = 0.35
+layout(matrix(c(1,2), ncol=1), heights=c(0.5,0.5))
+  par(mar=c(2,4,1,1), 
+      oma=c(2,0.1,1,0.1), 
+      tcl=-0.3,
+      mgp=c(2.5, 0.5, 0), las=1)
+plot(c(), c(),  log = 'x',
+     xlim = range(leak), type='l', ylim = c(-80, 100),
+     ylab = 'Phase shift (deg)', xaxt='n', frame=FALSE)
+lats <- seq(-11,-3,by=2)
+axis(1, at=10^lats, labels=parse(text=sprintf("10^%s",lats)))
+axis(3, at=10^lats, labels=FALSE)
+axis(4, labels=FALSE)
+box()
+
+for (i in seq_along(Transmiss)) {
+  T. <- Transmiss[i]
+  for (j in seq_along(Storativ)) {
+    S. <- Storativ[j]
+    wang  <- open_well_response(omeg, 
+                                T., 
+                                S.,
+                                Rs. = 0.1,
+                                model = 'wang', 
+                                leak = leak,
+                                freq.units = 'Hz', 
+                                as.pressure = FALSE)
+    wang <- wang[["Response"]][,2]
+    
+    col <- ifelse(i <=3, 'firebrick4', i)
+    if(i == 4) col <- 'dodgerblue4'
+    if(i == 5) col <- 'forestgreen'
+    points(x = leak, Arg(wang) * 180/pi, type = 'o', col = col,
+           pch = j, cex = pt.cex)
+    
+  }
+}
+legend('bottomright', 
+       col = c('firebrick4', 'dodgerblue4', 'forestgreen'),
+       lty = 1,
+       legend = c('1.0 >= T >= 1e-4',
+                  'T = 1e-6',
+                  'T = 1e-8'),
+       cex = 0.5)
+  
+plot(c(), c(),  log = 'xy',
+     xlim = range(leak), type='l', ylim = c(1e-10, 1),
+     ylab = 'Amplitude ratio',
+     xlab = 'Specific Leakage (1/s)', axes=FALSE)
+axis(1, at=10^lats, labels=parse(text=sprintf("10^%s",lats)))
+lats.y <- seq(-10,-1,by=3)
+axis(3, at=10^lats, labels=FALSE)
+axis(2, at=10^lats.y, labels=parse(text=sprintf("10^%s",lats.y)))
+axis(4, at=10^lats.y, labels=FALSE)
+box()
+
+for (i in seq_along(Transmiss)) {
+  T. <- Transmiss[i]
+  for (j in seq_along(Storativ)) {
+    S. <- Storativ[j]
+    wang  <- open_well_response(omeg, 
+                                T., 
+                                S.,
+                                Rs. = 0.1,
+                                model = 'wang', 
+                                leak = leak,
+                                freq.units = 'Hz', 
+                                as.pressure = FALSE)
+    wang <- wang[["Response"]][,2]
+    
+    col <- ifelse(i <=3, 'firebrick4', i)
+    if(i == 4) col <- 'dodgerblue4'
+    if(i == 5) col <- 'forestgreen'
+    points(x = leak, Mod(wang), type = 'o', col = col, 
+           pch = j, cex = pt.cex)
+    
+  }
+}
+legend('bottomleft', 
+       pch = 1:4,
+       legend = c('S = 1e-2',
+                  'S = 1e-4',
+                  'S = 1e-6',
+                  'S = 1e-8'),
+       pt.cex = pt.cex,
+       cex = 0.5)
+mtext("Leakage Coefficient (1/s)", side=1, line=2)
+
 
 ## ----eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=ROJRESP----
 wrsp <- open_well_response(omega, T.=T., S.=S., z=z, model = "rojstaczer", as.pressure=asP)

@@ -28,14 +28,27 @@
 \usepackage{color}
 \raggedright
 %
-\author{Andrew J. Barbour}
+\author{Andrew J. Barbour$^1$ $\cdot$ Jonathan Kennel$^2$}
 \title{Comparison of response functions in \kit{}}
+\date{%
+    \footnotesize{$1$ - U.S. Geological Survey $\cdot$ $2$ - University of Guelph}\\[2ex]%
+    \today
+}
 %
 \begin{document}
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(
+concordance=TRUE
+)
+@
+
+%\SweaveOpts{concordance=TRUE}
 %
 \newcommand{\SC}[1]{\textsc{#1}}
 \newcommand{\Rcmd}[1]{\texttt{#1}}
-\newcommand{\kit}[0]{\href{http://abarbour.github.io/kitagawa/}{\color{blue}\Rcmd{kitagawa}}}
+\newcommand{\kit}[0]{\href{https://github.com/abarbour/kitagawa/}{\color{blue}\Rcmd{kitagawa}}}
 \newcommand{\bidxa}[1]{\index{#1}{\textbf{#1}}} 
 \newcommand{\bidxb}[2]{\index{#2}{\textbf{#1}}} 
 \newcommand{\idxa}[1]{\index{#1}{#1}} 
@@ -44,25 +57,27 @@
 \maketitle
 %
 \begin{abstract}
-In this vignette I demonstrate the response functions found in 
+In this vignette we demonstrate the response functions found in 
 the package
 \kit{}, which are appropriate for modeling the effect of
 harmonic volumetric strain or pressure-head fluctuations in
 sealed and open water wells.
-There is only one sealed-well response function, from
+For sealed-wells there is only one response function, from
 \citet{kitagawa2011}, and this gives the complex frequency response of
 virtual water height $Z$ or pressure $P$ as a function of
 areal %volumetric?
 strain $\epsilon$.
-There is a suite of open-well response functions, from 
-\citet{cooper1965, hsieh1987, rojstaczer1988, liu1989}; and
+For open wells there is
+a suite of open-well response functions, from 
+\citet{cooper1965, hsieh1987, rojstaczer1988, liu1989, wang2018}; and
 these give the complex frequency response of
-water height as a function of aquifer head $H$ or pressure.
+water height as a function of aquifer head $H$ or pressure. \citet{wang2018}
+allows for leakage from the aquifer.
 \end{abstract}
 %
 \tableofcontents
 
-\clearpage
+%\clearpage
 \section{Introduction}
 
  The underlying physical model of these response functions
@@ -85,7 +100,8 @@ water height as a function of aquifer head $H$ or pressure.
  The solution  for an open well was first presented by
  \citet{cooper1965}, and subsequently modified by \citet{rojstaczer1988, liu1989}.
  \citet{kitagawa2011} adapted the solution
- of \citet{hsieh1987} for the case of a sealed well.
+ of \citet{hsieh1987} for the case of a sealed well. 
+ \citet{wang2018} provides the leaky aquifer response for an open well.
  
  These models are applicable to any quasi-static process involving harmonic, 
  volumetric strain of an aquifer 
@@ -97,7 +113,7 @@ water height as a function of aquifer head $H$ or pressure.
 
 \section{Preliminaries}
 
-<<eval=TRUE, echo=FALSE>>= 
+<<eval=TRUE, echo=FALSE>>=
 library(knitr)
 options(width=69)
 knitr::opts_chunk$set(tidy = TRUE, size="small")
@@ -106,7 +122,7 @@ knitr::opts_chunk$set(tidy = TRUE, size="small")
 
 Load the necessary packages:
 
-<<eval=TRUE, echo=TRUE, label=PRELIM>>= 
+<<eval=TRUE, echo=TRUE, label=PRELIM>>=
 library(RColorBrewer)
 Set1 <- brewer.pal(8, "Set1")
 library(signal, warn.conflicts=FALSE)
@@ -115,7 +131,7 @@ library(kitagawa)
 
 Setup some constants:
 
-<<eval=TRUE, echo=TRUE, label=PARAMS1>>= 
+<<eval=TRUE, echo=TRUE, label=PARAMS1>>=
 S. <- 1e-5    # Storativity [nondimensional]
 T. <- 1e-4    # Transmissivity [m**2 / s]
 D. <- T./S.   # Diffusivity [m**2 / s]
@@ -143,7 +159,7 @@ And create the dimensionless frequencies,
 defined by $z^2 \omega / 2 D$,
 where $D$ is the hydraulic diffusivity:
 
-<<eval=TRUE, echo=TRUE, label=PARAMS2>>= 
+<<eval=TRUE, echo=TRUE, label=PARAMS2>>=
 # Frequencies
 Q <- 10**seq(-5,2,by=0.05)					# [nondimensional]
 lQ <- log10(Q)
@@ -167,7 +183,7 @@ And onto the response functions...
 
 \subsection{Strain: Kitagawa et al. (2011)}
 %
-<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=KITRESP>>= 
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=KITRESP>>=
 wrsp <- well_response(omega, T.=T., S.=S., Vw.=Vw., Rs.=Rs., Ku.=Ku., B.=B., Avs=1, Aw=1, as.pressure=asP)
 plot(wrsp) # uses plot.wrsp method
 crsp <- wrsp[["Response"]][,2]	# Complex response
@@ -216,7 +232,7 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 
 \subsection{Pressure head: Cooper et al. (1965)}
 
-<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=COOPERRESP>>= 
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=COOPERRESP>>=
 wrsp <- open_well_response(omega, T.=T., S.=S., Ta=Ta, Hw=Hw, 
 	model = "cooper", as.pressure=ZasP)
 plot(wrsp)
@@ -263,7 +279,7 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \clearpage
 \subsection{Pressure head: Hsieh et al. (1987)}
 
-<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=HSIEHRESP>>= 
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=HSIEHRESP>>=
 wrsp <- open_well_response(omega, T.=T., S.=S.,  Ta=Ta, Hw=Hw, model = "hsieh", as.pressure=ZasP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
@@ -309,7 +325,7 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \clearpage
 \subsection{Pressure head: Liu et al. (1989)}
 
-<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=LIURESP>>= 
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=LIURESP>>=
 wrsp <- open_well_response(omega, T.=T., S.=S.,  Ta=Ta, Hw=Hw, model = "liu", as.pressure=ZasP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
@@ -335,12 +351,12 @@ log10_ticks()
 mtext("Open Well Response (LIU): Harmonic Strain", font=2, line=1.5)
 mtext("(a) Gain", adj=0)
 par(mar=c(4,4,1.1,2))
-plot(lQ, lP$Phs*180/pi, type="l", lty=3, #ylim=c(-190, -130), 
+plot(lQ, lP$Phs*180/pi, type="l", lwd = 2, #ylim=c(-190, -130), 
 	 xaxt="n",
      ylab=expression(Z ~ "rel." ~ H),
      xlab=expression("Dimensionless frequency," ~ Q ==z^2 * omega / 2 * D  ))
 abline(h=-180, col="grey")
-lines(lQ, lP$uPhs*180/pi, type="l", lwd=2)
+lines(lQ, lP$uPhs*180/pi, type="l", lty=3)
 log10_ticks()
 mtext("(b) Phase", adj=0)
 @
@@ -352,10 +368,134 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \end{center}
 \end{figure}
 
+
+
+\clearpage
+\subsection{Pressure head (with leakage): Wang et al. (2018)}
+
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=WANGRESP>>=
+wrsp <- open_well_response(omega, T.=T., S.=S., leak = 1e-8,
+                           model = "wang", as.pressure=asP)
+plot(wrsp)
+crsp <- wrsp[["Response"]][,2]
+rGain <- Mod(crsp)
+rP <- Phase(crsp)
+@
+
+\clearpage
+\subsubsection{Figure 2 from Wang et al. (2018)}
+
+<<eval=TRUE, echo=TRUE, label=WANGRESPDAT>>=
+Transmiss <- c(1e0, 1e-2, 1e-4, 1e-6, 1e-8)
+Storativ  <- c(1e-2, 1e-4, 1e-6, 1e-8)
+omeg      <- 1.9322736 / 86400 # M2 in Hz
+leak      <- 10^seq(-11, -3, 0.2)
+@
+
+\begin{figure}[htb!]
+\begin{center}
+<<eval=TRUE, echo=FALSE, fig.height=4.7, fig.width=4, label=WANGRESPFIG>>=
+
+pt.cex = 0.35
+layout(matrix(c(1,2), ncol=1), heights=c(0.5,0.5))
+  par(mar=c(2,4,1,1), 
+      oma=c(2,0.1,1,0.1), 
+      tcl=-0.3,
+      mgp=c(2.5, 0.5, 0), las=1)
+plot(c(), c(),  log = 'x',
+     xlim = range(leak), type='l', ylim = c(-80, 100),
+     ylab = 'Phase shift (deg)', xaxt='n', frame=FALSE)
+lats <- seq(-11,-3,by=2)
+axis(1, at=10^lats, labels=parse(text=sprintf("10^%s",lats)))
+axis(3, at=10^lats, labels=FALSE)
+axis(4, labels=FALSE)
+box()
+
+for (i in seq_along(Transmiss)) {
+  T. <- Transmiss[i]
+  for (j in seq_along(Storativ)) {
+    S. <- Storativ[j]
+    wang  <- open_well_response(omeg, 
+                                T., 
+                                S.,
+                                Rs. = 0.1,
+                                model = 'wang', 
+                                leak = leak,
+                                freq.units = 'Hz', 
+                                as.pressure = FALSE)
+    wang <- wang[["Response"]][,2]
+    
+    col <- ifelse(i <=3, 'firebrick4', i)
+    if(i == 4) col <- 'dodgerblue4'
+    if(i == 5) col <- 'forestgreen'
+    points(x = leak, Arg(wang) * 180/pi, type = 'o', col = col,
+           pch = j, cex = pt.cex)
+    
+  }
+}
+legend('bottomright', 
+       col = c('firebrick4', 'dodgerblue4', 'forestgreen'),
+       lty = 1,
+       legend = c('1.0 >= T >= 1e-4',
+                  'T = 1e-6',
+                  'T = 1e-8'),
+       cex = 0.5)
+  
+plot(c(), c(),  log = 'xy',
+     xlim = range(leak), type='l', ylim = c(1e-10, 1),
+     ylab = 'Amplitude ratio',
+     xlab = 'Specific Leakage (1/s)', axes=FALSE)
+axis(1, at=10^lats, labels=parse(text=sprintf("10^%s",lats)))
+lats.y <- seq(-10,-1,by=3)
+axis(3, at=10^lats, labels=FALSE)
+axis(2, at=10^lats.y, labels=parse(text=sprintf("10^%s",lats.y)))
+axis(4, at=10^lats.y, labels=FALSE)
+box()
+
+for (i in seq_along(Transmiss)) {
+  T. <- Transmiss[i]
+  for (j in seq_along(Storativ)) {
+    S. <- Storativ[j]
+    wang  <- open_well_response(omeg, 
+                                T., 
+                                S.,
+                                Rs. = 0.1,
+                                model = 'wang', 
+                                leak = leak,
+                                freq.units = 'Hz', 
+                                as.pressure = FALSE)
+    wang <- wang[["Response"]][,2]
+    
+    col <- ifelse(i <=3, 'firebrick4', i)
+    if(i == 4) col <- 'dodgerblue4'
+    if(i == 5) col <- 'forestgreen'
+    points(x = leak, Mod(wang), type = 'o', col = col, 
+           pch = j, cex = pt.cex)
+    
+  }
+}
+legend('bottomleft', 
+       pch = 1:4,
+       legend = c('S = 1e-2',
+                  'S = 1e-4',
+                  'S = 1e-6',
+                  'S = 1e-8'),
+       pt.cex = pt.cex,
+       cex = 0.5)
+mtext("Leakage Coefficient (1/s)", side=1, line=2)
+
+@
+\caption{Amplitude and phase shift as a function of the specific leakage (K'/b') using the Wang 2018 model for the M2 tide.}
+\label{fig:owrsp-wang}
+\end{center}
+\end{figure}
+
+
+
 \clearpage
 \subsection{Strain: Rojstaczer (1988)}
 
-<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=ROJRESP>>= 
+<<eval=TRUE, echo=TRUE, fig.height=4.7, fig.width=4, label=ROJRESP>>=
 wrsp <- open_well_response(omega, T.=T., S.=S., z=z, model = "rojstaczer", as.pressure=asP)
 plot(wrsp)
 crsp <- wrsp[["Response"]][,2]
@@ -393,12 +533,14 @@ log10_ticks()
 mtext("(b) Phase", adj=0)
 @
 \caption{The response of an open well to harmonic areal strain using
-the Rojstaczer model. Modified from \citet[][Fig.~3]{rojstaczer1988}.
+the Rojstaczer model. In the phase curve, phase wrapping has been removed.
+Modified from \citet[][Fig.~3]{rojstaczer1988}.
 Frequency is dimensionless, based on the well-depth $z$ and the diffusivity
 $D$.}
 \label{fig:owrsp-roj}
 \end{center}
 \end{figure}
+
 
 \clearpage
 \section{Model Comparisons}

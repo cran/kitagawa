@@ -1,7 +1,7 @@
-## ---- echo=TRUE----------------------------------------------------------
+## ---- echo=TRUE---------------------------------------------------------------
 library(kitagawa)
 
-## ---- echo=TRUE----------------------------------------------------------
+## ---- echo=TRUE---------------------------------------------------------------
 library(psd)
 data(Tohoku)
 toh_orig <- with(subset(Tohoku, epoch=='seismic'), {
@@ -13,13 +13,25 @@ toh_orig <- with(subset(Tohoku, epoch=='seismic'), {
 colnames(toh_orig) <- c('input','output')
 toh.dat <- window(ts(toh_orig), 100, 2400)
 
-## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5----------
+## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5---------------
 library(RColorBrewer)
 Set1 <- brewer.pal(8, 'Set1')
 par(mar=c(3,3,0.2,0.2))
 plot(toh.dat, yax.flip = TRUE, main="Strain and Pressure: 2011 M9 Tohoku")
 
-## ---- echo=FALSE, fig.show='hold', fig.width=4.5, fig.height=4.5---------
+## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5---------------
+windat <- scale(window(toh.dat, 1400, 1600))
+plot(windat[,'input'], lty=5, type='l', ylab='', main='Rescaled Input and Output')
+lines(-windat[,'output'], col=2, lwd=1.5)
+lines(as.vector(time(windat)), scale(apply(windat,1, function(x){x <- abs(x); atan2(x[1],x[2])}))/2, lty=1, col=4)
+legend('topleft', c('Input strain','Output pressure','Internal angle'), col=c(1,2,4), lty=c(2,1,1), lwd=c(1,1.5,1))
+
+## ---- echo=TRUE---------------------------------------------------------------
+m <- lm(output ~ input - 1, as.data.frame(toh.dat))
+strain_scaling <- coef(m)
+signif(strain_scaling, 3) # GPa/strain
+
+## ---- echo=FALSE, fig.show='hold', fig.width=4.5, fig.height=4.5--------------
 IO <- as.matrix(toh.dat)
 plot(IO[,1], IO[,2], 
      asp=1, col=NA, 
@@ -28,44 +40,15 @@ plot(IO[,1], IO[,2],
      ylab="Output (pore pressure)")
 grid()
 points(IO[,1], IO[,2], pch=3)
+abline(m, col=2)
 
-## ---- echo=TRUE----------------------------------------------------------
-library(sapa)
-k <- 2*130
-toh.cs <- sapa::SDF(toh.dat, method='multitaper', n.taper=k, sampling.interval=1)
-print(toh.cs)
-
-## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=5.5----------
-plot(toh.cs)
-
-## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=2.5----------
-#based on $k$ sine tapers:
-par(mar=c(3,2,1,0.2))
-hantaps <- t(unclass(attr(toh.cs,'taper')))
-#matplot(hantaps, type='l', lty=1, xlab='', ylab='time, seconds')
-
-## ---- echo=TRUE----------------------------------------------------------
-f <- as.vector(attr(toh.cs, 'frequency'))
-lf <- log10(f)
-p <- 1/f
-lp <- log10(p)
-S <- as.matrix(toh.cs)
-colnames(S) <- attr(toh.cs, 'labels')
-S11 <- S[,'S11']
-S12 <- S[,'S12']
-S22 <- S[,'S22']
-Coh <- abs(Mod(S12)^2 / (S11 * S22))
-G <- abs(sqrt(Coh * S22 / S11))
-Phi <- atan2(x = Re(S12), y = Im(S12))
-Phi2 <- Arg(S12)
-all.equal(Phi, Phi2)
-
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+k <- 2*130 # number to start out with
 gam <- seq(0.001, 1, by=0.001)
 gamrat <- 2 * gam / (1 - gam)
 Pgam <- pf(k*gamrat, 2, 4*k)
 
-## ---- echo=FALSE, fig.show='hold', fig.width=5.5, fig.height=4.5---------
+## ---- echo=FALSE, fig.show='hold', fig.width=5.5, fig.height=4.5--------------
 k2 <- 100
 Pgam2 <- pf(k2*gamrat, 2, 4*k2)
 k3 <- 10
@@ -78,71 +61,116 @@ plot(x.g, Pgam, type='l',
 lines(x.g, Pgam2, lty=5)
 lines(x.g, Pgam3, lty=2)
 legend('bottomright', parse(text=c(sprintf("k==%s",c(k,k2,k3)))), lty=c(1,5,2))
-coh.99 <- max(gam[Pgam <= 0.995]) # confidence level
 
-## ------------------------------------------------------------------------
+## ---- echo=TRUE---------------------------------------------------------------
+#!order_matters
+class(toh.dat)
+toh_to_pspec <- toh.dat[,c('input','output')]
+toh.cs <- psd::pspectrum(toh_to_pspec, ntap.init=k, verbose=FALSE)
+
+## ---- echo=TRUE---------------------------------------------------------------
+class(toh.cs)
+str(toh.cs)
+
+## ---- echo=TRUE, fig.show='hold', fig.width=5., fig.height=7------------------
+
+f <- as.vector(toh.cs[['freq']]) # frequency
+lf <- log10(f)
+p <- 1/f # period
+
+# coherence
+Coh <- toh.cs[['coh']]
+# wrapped phase (in radians)
+Phi <- as.vector(toh.cs[['phase']])
+suppressPackageStartupMessages(can.unwrap <- require(signal))
+if (can.unwrap){
+  # unwrap if possible
+  Phi <- signal::unwrap(Phi)
+}
+# Admittance or Gain
+G <- Mod(toh.cs[['transfer']])
+G <- Coh * G
+# Tapers
+K <- toh.cs[['taper']] # 'tapers' object
+k <- as.numeric(K)
+# Uncertainty in the admittance
 G.err <- sqrt((1 - Coh) / k)
 
-## ---- echo=TRUE----------------------------------------------------------
-csd <- data.frame(f, p, lf, lp, Coh, G, G.err, Phi = Phi * 180 / pi)
+## ---- echo=TRUE---------------------------------------------------------------
+csd <- data.frame(f, p, lf, Coh, k, G, G.err, Phi = Phi * 180 / pi)
 csd.f <- subset(csd, p <= 100)
-is.sig <- csd.f$Coh > coh.99
 
-## ---- echo=FALSE, fig.show='hold', fig.width=6., fig.height=6.5----------
-unwrap.phase.lower <- function(p, thresh=0) {
-  while (any(p <= thresh)){
-    inds <- p <= thresh
-    p[inds] <- p[inds] + 360
-  }
-  return(p)
-}
+## ---- echo=FALSE, fig.show='hold', fig.width=6., fig.height=6.5---------------
 
-layout(matrix(1:3), heights=c(1.3,2,2))
-par(mar=c(1, 3, 0.0, 0.1), oma=c(4,0.1,2,0.1), cex=0.8, las=1)
+layout(matrix(1:3), heights=c(2,2,1.5))
+par(oma=c(1,1,3,1), cex=0.8, las=1, tcl=-0.2, mgp=c(2,0.3,0))
 
-plot(Coh ~ lf, csd.f, type='l', xaxt='n', ylim=c(0,1), 
-     xaxs='i',
+par(mar=c(0.1, 4, 1, 4))
+plot(Coh ~ f, csd.f, 
+     log='x',
+     xlab='', ylab='',
+     type='l', xaxt='n', 
+     ylim=c(-0.6,1), 
+     xaxs='i', yaxt='n',
      yaxs='i', frame=FALSE)
-mtext('Coherence', font=2, line=-2.5, adj=0.1)
-mtext(parse(text=sprintf("over(%s ~ 'tapers', 'conf.:' ~ %s)", k, coh.99)), cex=0.9, adj=0.95, line=-1.8, col='cyan4')
-axis(1, at=-3:1, labels=FALSE)
+abline(h=c(0,1), lty=3)
+mtext('Coherence', font=2, line=-2.5, adj=0.3)
+mtext('No. tapers', side=1, font=3, line=-2.7, adj=0.2)
+axis(2, at=seq(0,1,by=0.2))
+#axis(1, col=NA, col.ticks=1, labels=FALSE)
+axis(3, col=NA, col.ticks=1)
+title("Cross Spectrum: Pressure from Strain (Tohoku M9)", outer=TRUE)
+par(new=TRUE)
+plot(K, xaxs='i', yaxs='i', axes=FALSE, ylim=c(0,1000),xlab='', ylab='')
+axis(4, at=seq(0,300,by=100))
+par(new=FALSE)
+box()
 
-plot(G ~ lf, csd.f, type='l', 
-     yaxt='n', xaxt='n', col=NA, frame=FALSE,
-     xaxs='i', yaxs='i', ylim=c(0.0, 1.01*max(pretty(csd.f$G))))
-axis(1, at=csd.f$lf, tcl=0.3, col=NA, col.ticks='grey', labels = FALSE, line=0)
-nsig <- 3
+par(mar=c(0.1, 4, 0, 4))
+nsig <- 2
 with(csd.f, {
-  polygon(c(lf,rev(lf)), c(G + nsig*G.err, rev(G - nsig*G.err)), col='cyan', border=NA)
+  lG <- log10(G)
+  Delt <- nsig*log10(exp(1))*G.err/G
+  Upper <- lG + Delt
+  Lower <- lG - Delt
+  ylim <- range(c(lG)) + log10(2)*c(-1,2)
+  plot(f, lG, type='l', 
+       log='x',
+       yaxt='n', xlab='', ylab='',
+       xaxt='n', 
+       col=NA, frame=FALSE,
+       xaxs='i', yaxs='i', ylim=ylim)
+  polygon(c(f, rev(f)), c(Upper, rev(Lower)), col='lightcyan', border='lightgrey')
+  lmsc <- log10(abs(strain_scaling))
+  abline(h=lmsc, col=2, lty=2)
+  mtext("scaling\nfrom lm", side=4, at=lmsc, col=2, line=0.2, font=3)
+  lines(f, lG)
 })
-lines(G ~ lf, csd.f)
-#dg <- round(coef(lm(output ~ input-1, as.data.frame(toh.dat))), 3)
-#abline(h=abs(dg), lty=2)
-mtext('Admittance', font=2, line=-3.3, adj=0.1)
-mtext(parse(text=sprintf("%s * sigma ~ 'uncert.'", nsig)), cex=0.9, adj=0.95, line=-2.2, col='cyan4')
-axis(1, at=-3:1, labels=FALSE)
-axis(2)
-#box()
+mtext('Admittance', font=2, line=-4.3, adj=0.3)
+mtext(parse(text=sprintf("%s * sigma ~ 'uncert.'", nsig)), cex=1, adj=0.3, line=-5.5,  col='cyan4')
+ll <- c(1,2,5)
+lbls <- c(ll/1000, ll/100, ll/10, ll, ll*10)
+ats <- log10(lbls)
+lbls[c(F,T,T)] <- ""
+axis(2, at=ats, labels=lbls)
+box()
 
-plot(Phi ~ lf, csd.f, 
-     type='l', col='lightgrey', 
+par(mar=c(1, 4, 0, 4))
+degadd <- 180
+plot(Phi + degadd ~ f, csd.f, 
+     log='x',
+     type='l', #col='lightgrey', 
+     xlab='Frequency, Hz', ylab="Degrees (<0 = lag)",
      xaxs='i', frame=FALSE,
-     ylim=181*c(0.65,1.08), 
-     yaxs='i', yaxt='n', xaxt='n')
-yat <- 180*(-2:2)/2
-abline(h=yat, lty=3)
-Phina <- unwrap.phase.lower(csd.f$Phi)
-Phina[!is.sig] <- NA
-lines(csd.f$lf, Phina)
-mtext('Phase (unwrapped)', font=2, line=-2.0, adj=0.1)
-axis(2)
-logticks(1, major.ticks = -3:1)
-axis(1, at=-3:1, labels=paste0("(",c(1000,100,10,1,"1/10"),'s)'), line=1.6, lwd=0)
+     #yaxs='i', 
+     yaxt='n')
 
-## ---- fig.width=6., fig.height=3.5---------------------------------------
-TohCS <- cross_spectrum(toh.dat, k=50, verbose=FALSE)
-TohCS_welch <- cross_spectrum(toh.dat, k=NULL, verbose=FALSE) # turn off k to get a Welch overlapping csd
-plot(Admittance ~ Period, TohCS, col=NA, log='x', main="Pore Pressure from Strain: Tohoku", xlab="Period, sec")
-lines(Admittance ~ Period, TohCS_welch, col='salmon')
-lines(Admittance ~ Period, TohCS, lwd=2)
+lmphs <- 180 * sign(strain_scaling) + degadd
+abline(h=lmphs, col=2, lty=2)
+mtext("sign of\nlm coef.", side=4, at=lmphs, col=2, line=0.2, font=3)
+
+mtext(sprintf('Relative Phase',ifelse(can.unwrap," (Unwrapped)","")), font=2, line=-4.0, adj=0.3)
+axis(2)
+axis(1, at=10**(-3:1), labels=paste0("(",c(1000,100,10,1,"1/10"),'s)'), line=1.6, lwd=0)
+box()
 

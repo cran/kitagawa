@@ -12,7 +12,8 @@
 #' given. Default values are assumed where reasonable--for instance, 
 #' the pore-fluid is assumed to be water--but considerable care 
 #' should be invested in the choice of
-#' parameters, unless the function is used in an optimization scheme.
+#' parameters, especially in the case of starting parameters
+#'in an optimization scheme.
 #' 
 #' The responses returned here are,
 #' effectively, the amplification of water levels in a well, relative to 
@@ -29,7 +30,7 @@
 #' are taken from \code{\link{constants}}.
 #' \emph{Parameters which do not end in \code{.} do
 #' not need to be specified (they may be excluded); if
-#' they are missing, warnings will be thrown.}
+#' they are missing, assumptions may be made and warnings will be thrown.}
 #' 
 #' @section Models:
 #' \subsection{\code{"rojstaczer"}}{
@@ -39,13 +40,20 @@
 #' \subsection{\code{"cooper"}, \code{"hsieh"}, and \code{"liu"}}{
 #' Cooper et al (1965), Hsieh et al (1987) and Liu et al (1989) are based
 #' on measurements of water level and 
-#' displacements from seismometers; these 
+#' displacements from seismometers or strainmeters; these 
 #' models are expressed succinctly in Roeloffs (1996).
 #' 
 #' The sense of the phase shift 
 #' for the Liu and Rojstaczer models are reversed from their original presentation, 
 #' in order to account for differences in sign convention.
 #' }
+#' 
+#' \subsection{\code{"wang"}}{
+#' Wang et al (2018) allows for specific leakage -- vertical conductivity across
+#' a semi-permeable aquitard -- but the perfectly confined case (i.e., Hsieh, et al 1987)
+#' is recovered when leakage is zero.
+#' }
+#' 
 #'
 #' @name open_well_response
 #' @export
@@ -59,22 +67,25 @@
 #' @param z numeric; From Rojstaczer (1988): the depth from the water table (assumed if missing and if needed)
 #' @param Hw numeric; height of water column above confined surface (assumed if missing and if needed)
 #' @param Ta numeric; thickness of aquifer (assumed if missing and if needed)
+#' @param leak numeric; specific leakage \eqn{K'/b'} \eqn{[1/s]}
 #' @param freq.units character; setup the units of \code{omega}
 #' @param model  character; use the response model from either
 #'    Rojstaczer (1988),
 #'    Liu et al (1989),
-#'    Cooper et al (1965), or
-#'    Hsieh et al (1987).
+#'    Cooper et al (1965), 
+#'    Hsieh et al (1987), or
+#'    Wang et al (2018).
 #' @param as.pressure logical; should the response be relative to aquifer pressure? (default is aquifer head)
 #' @param ... additional arguments
 #' 
 #' @return An object with class \code{'owrsp'}
 #' 
-#' @author A. J. Barbour
+#' @author A. J. Barbour and J. Kennel
+#' 
+#' @references See \code{\link{kitagawa-package}} for references and more background.
 #'
-#' @seealso 
-#' \code{\link{owrsp-methods}} for a description of the class 'owrsp' and its methods, and
-#' \code{\link{kitagawa-package}} for references and more background.
+#' @seealso \code{\link{well_response}} for the sealed-well equivalents, and
+#' \code{\link{owrsp-methods}} for a description of the class \code{'owrsp'} and its methods.
 #' @family WellResponseFunctions
 #' 
 #' @examples
@@ -88,9 +99,9 @@ open_well_response <- function(omega, T., S., ...) UseMethod("open_well_response
 #' @export
 open_well_response.default <- function(omega, T., S., 
                                        Rs.=(8/12)*(1200/3937),
-                                       rho, grav, z, Hw, Ta,
+                                       rho, grav, z, Hw, Ta, leak,
                                        freq.units=c("rad_per_sec","Hz"),
-                                       model=c("rojstaczer","liu","cooper","hsieh"),
+                                       model=c("rojstaczer","liu","cooper","hsieh","wang"),
                                        as.pressure=TRUE, ...){
   # Pick a model
   model <- match.arg(model)
@@ -143,6 +154,27 @@ open_well_response.default <- function(omega, T., S.,
     phs <- -1*Arg(wellresp)
     wellresp <- complex(modulus=amp, argument=phs)
     #
+  } else if (model == 'wang'){
+   
+    Zunits <- ifelse(as.pressure, "Z/P", "Z/H")
+    
+    if (missing(leak)){
+      leak <- 1
+      warning("specific leakage 'leak' not given. using default")
+    }
+    
+    Rc.     <- Rs.     # currently set casing and screen equal
+    t1      <- 1i * omega * S.
+    beta    <- sqrt((leak / T.) + (t1 / T.))
+    beta_rw <- beta * Rs.
+    
+    k0    <- Bessel::BesselK(beta_rw, nu = 0, nSeq = 2, expon.scaled = FALSE)
+    numer <- Rc.^2 * 1i  * omega * k0[,1]
+    denom <- Rs. * 2.0 * T. * beta * k0[,2]
+    xi    <- 1.0 + (numer / denom)
+    
+    wellresp <- t1 / (xi * (t1 + (leak)))
+
   } else if (model %in% c("liu","cooper","hsieh")){
     #    
     Zunits <- ifelse(as.pressure, "Z/P", "Z/H")
@@ -180,15 +212,12 @@ open_well_response.default <- function(omega, T., S.,
       gamma <- sqrt(2*onei*omega/(Rs.**2 * grav * U.))
       expgam <- exp(-1*gamma*Ta)
       exp2gam <- exp(-2*gamma*Ta)
-      A. <- -1 * omegsq / grav * (Hw + (1 - expgam)/(1 + expgam)/gamma)
+      A. <- -1 * omegsq / grav * (Hw + (1 - expgam)/(1 + expgam)/gamma) + 1
+      # fix a -1 sign convention in Liu (relative to Hsieh/Cooper)
       B. <- -1 * onei * omega * U. * Rs.**2 * gamma * expgam / (1 - exp2gam)
       # Eq A20 -- x / h
-      wellresp <- 1 / (A. + B. + 1)
-      # fix a -1 sign convention in Liu (relative to Hsieh/Cooper)
-      amp <- Mod(wellresp)
-      phs <- -1*Arg(wellresp)
-      wellresp <- complex(modulus=amp, argument=phs)
-      #
+      wellresp <- complex(modulus = Mod(1/(A.+B.)), argument = -Arg(A. - B.))
+
     } else if (model=="hsieh"){
       #
       # from Hsieh et al (1987), Eq 12-16
@@ -216,6 +245,8 @@ open_well_response.default <- function(omega, T., S.,
       # pressure head in the aquifer
       # Eq 28 -- A == x / h == rho * g x / p
       wellresp <- 1 / complex(real=A., imaginary=B.)
+    } else if (model=="wang"){
+
     }
   }
   #

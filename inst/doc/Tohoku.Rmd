@@ -1,20 +1,22 @@
 ---
-title: "Cross-spectrum computation: Pore-pressure response to the 2011 M9 Tohoku-Oki earthquake"
+title: "Cross Spectrum Computation"
 author: "Andrew J Barbour"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Cross-spectrum computation}
+  %\VignetteIndexEntry{Cross Spectrum Computation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: REFS.bib
 ---
+<!-- bibliography: REFS.bib -->
+
 
 Here I show how the modeling tools in **kitagawa** can be
 used to study actual data.  Specifically, I will show
 records of strain and pore-pressure from borehole
-stations in the [Plate Boundary Observatory](http://pbo.unavco.org/)
-in a manner similar to the approaches taken in @barbour2011 and @barbour2015.
+stations in the [Network of the Americas(https://www.unavco.org/projects/major-projects/nota/nota.html)^[previously known as the [Plate Boundary Observatory](https://www.unavco.org/unavco.html)]
+in a manner similar to the approaches taken in 
+[Barbour (2015)](https://doi.org/10.1002/2015JB012201).
 
 ```{r, echo=TRUE}
 library(kitagawa)
@@ -28,7 +30,7 @@ interested in assessing the frequency-dependent
 relationship between pore pressure $p$ and
 _areal_ strain $E_A$^[Relative changes in borehole
 diameter, which can be related to volume strain in the rock] during the seismic
-portion of the record.
+portion of the record.]
 
 ```{r, echo=TRUE}
 library(psd)
@@ -51,19 +53,39 @@ Set1 <- brewer.pal(8, 'Set1')
 par(mar=c(3,3,0.2,0.2))
 plot(toh.dat, yax.flip = TRUE, main="Strain and Pressure: 2011 M9 Tohoku")
 ```
-This indicates that the pore pressure response can be modeled as a convolution of an input
-signal (dynamic strain) and transfer function ($p = G \star E_A$). It also says that
-energy carried by the seismic wavetrain is focused predominately at long
-periods and very nearly harmonic; this is consistent with the 
-theory of linear poroelasticity, which predicts that
+The energy carried by the seismic wavetrain is focused predominately at long
+periods and for the surface waves it is very nearly harmonic.
+Zooming in on the early part of the Rayleigh wave:
+```{r, echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5}
+windat <- scale(window(toh.dat, 1400, 1600))
+plot(windat[,'input'], lty=5, type='l', ylab='', main='Rescaled Input and Output')
+lines(-windat[,'output'], col=2, lwd=1.5)
+lines(as.vector(time(windat)), scale(apply(windat,1, function(x){x <- abs(x); atan2(x[1],x[2])}))/2, lty=1, col=4)
+legend('topleft', c('Input strain','Output pressure','Internal angle'), col=c(1,2,4), lty=c(2,1,1), lwd=c(1,1.5,1))
+```
+we see a close mirroring of the input and the output, with the input occurring
+before the output. The tangent of the angle between the signals 
+during the periods of more purely harmonic strain 
+is suggestive of a simple phase
+lag. In other words, the pore pressure lags the strain.
+These observations are consistent with the 
+theory of linear poroelasticity, which predicts the following response in undrained conditions
+(assuming an undrained Poisson's ratio of $1/3$):
 $$
 p \approx - \frac{4}{3} B \mu E_A
 $$
-assuming an undrained Poisson's ratio of $1/3$, where
-$B$ is the Skempton's coefficient and $\mu$ is the elastic
-shear modulus of the fluid-saturated rock. In 
+where $B$ is the Skempton's coefficient and $\mu$ is the elastic
+shear modulus of the fluid-saturated rock. 
+All of this indicates that the pore pressure response can be modeled as a convolution of an input
+signal (dynamic strain) and transfer function ($p = G \star E_A$). 
+
+In 
 this case the (scalar) proportionality implied by the timeseries is 
-`r round(coef(lm(output ~ input - 1, as.data.frame(toh.dat))), 3)` $GPa / \epsilon$, 
+```{r, echo=TRUE}
+m <- lm(output ~ input - 1, as.data.frame(toh.dat))
+strain_scaling <- coef(m)
+signif(strain_scaling, 3) # GPa/strain
+```
 but we will see how this is actually frequency dependent.
 ```{r, echo=FALSE, fig.show='hold', fig.width=4.5, fig.height=4.5}
 IO <- as.matrix(toh.dat)
@@ -74,34 +96,13 @@ plot(IO[,1], IO[,2],
      ylab="Output (pore pressure)")
 grid()
 points(IO[,1], IO[,2], pch=3)
+abline(m, col=2)
 ```
 
 ## Cross-Spectrum Estimation
 
-First let's use Don Percival's package [sapa](https://cran.r-project.org/package=sapa)
-to estimate a cross spectrum between pressure and strain,
-treating strain as the input to the system and
-pressure as the output:
-```{r, echo=TRUE}
-library(sapa)
-k <- 2*130
-toh.cs <- sapa::SDF(toh.dat, method='multitaper', n.taper=k, sampling.interval=1)
-print(toh.cs)
-```
-```{r, echo=FALSE, fig.show='hold', fig.width=7., fig.height=5.5}
-plot(toh.cs)
-```
-```{r, echo=FALSE, fig.show='hold', fig.width=7., fig.height=2.5}
-#based on $k$ sine tapers:
-par(mar=c(3,2,1,0.2))
-hantaps <- t(unclass(attr(toh.cs,'taper')))
-#matplot(hantaps, type='l', lty=1, xlab='', ylab='time, seconds')
-```
-
-### Estimating the Response: Coherence, Admittance, and Phase
-
-If the results of the `SDF` computation give
-a matrix of complex spectra $[S_{11}, S_{12}, S_{22}]$, 
+If the results of the spectral computation include the complex 
+auto spectra and cross spectrum $[S_{11}, S_{12}, S_{22}]$, 
 the _coherence_ spectrum $\gamma^2$ can be calculated by
 $$
 \gamma^2 = \frac{\left|S_{12}\right|^2}{S_{11} S_{22}},
@@ -114,25 +115,7 @@ and the phase spectrum $\Phi$ can be calculated from
 $$
 \Phi = \arg{S_{12}}
 $$
-
-```{r, echo=TRUE}
-f <- as.vector(attr(toh.cs, 'frequency'))
-lf <- log10(f)
-p <- 1/f
-lp <- log10(p)
-S <- as.matrix(toh.cs)
-colnames(S) <- attr(toh.cs, 'labels')
-S11 <- S[,'S11']
-S12 <- S[,'S12']
-S22 <- S[,'S22']
-Coh <- abs(Mod(S12)^2 / (S11 * S22))
-G <- abs(sqrt(Coh * S22 / S11))
-Phi <- atan2(x = Re(S12), y = Im(S12))
-Phi2 <- Arg(S12)
-all.equal(Phi, Phi2)
-```
-
-As @priestley1981 shows, the multitaper coherency spectrum ($\gamma$) can be described by an \texit{F} distribution:
+As Priestley (1981) shows, the multitaper coherency spectrum ($\gamma$) can be described by an \texit{F} distribution:
 $$
 \frac{2 k \gamma}{(1-\gamma)} \sim F(2,4k)
 $$
@@ -141,6 +124,7 @@ $$
 P(|\gamma| \geq c, k) = (1 - c^2)^{k-1}
 $$
 ```{r}
+k <- 2*130 # number to start out with
 gam <- seq(0.001, 1, by=0.001)
 gamrat <- 2 * gam / (1 - gam)
 Pgam <- pf(k*gamrat, 2, 4*k)
@@ -158,89 +142,175 @@ plot(x.g, Pgam, type='l',
 lines(x.g, Pgam2, lty=5)
 lines(x.g, Pgam3, lty=2)
 legend('bottomright', parse(text=c(sprintf("k==%s",c(k,k2,k3)))), lty=c(1,5,2))
-coh.99 <- max(gam[Pgam <= 0.995]) # confidence level
 ```
 
 The standard error in the admittance follows from the coherence spectrum:
 $$
 \sqrt{(1 - \gamma^2)/k}
 $$
-```{r}
+
+## Application to Tohoku record
+
+First let's use [psd](https://cran.r-project.org/package=psd)
+to estimate a cross spectrum between pressure and strain,
+treating strain as the input to the system and
+pressure as the output.
+```{r, echo=TRUE}
+#!order_matters
+class(toh.dat)
+toh_to_pspec <- toh.dat[,c('input','output')]
+toh.cs <- psd::pspectrum(toh_to_pspec, ntap.init=k, verbose=FALSE)
+```
+Which gives the following results:
+```{r, echo=TRUE}
+class(toh.cs)
+str(toh.cs)
+```
+
+We form the requisite quantities, which are included as output from `pspectrum`:
+```{r, echo=TRUE, fig.show='hold', fig.width=5., fig.height=7}
+
+f <- as.vector(toh.cs[['freq']]) # frequency
+lf <- log10(f)
+p <- 1/f # period
+
+# coherence
+Coh <- toh.cs[['coh']]
+# wrapped phase (in radians)
+Phi <- as.vector(toh.cs[['phase']])
+suppressPackageStartupMessages(can.unwrap <- require(signal))
+if (can.unwrap){
+  # unwrap if possible
+  Phi <- signal::unwrap(Phi)
+}
+# Admittance or Gain
+G <- Mod(toh.cs[['transfer']])
+G <- Coh * G
+# Tapers
+K <- toh.cs[['taper']] # 'tapers' object
+k <- as.numeric(K)
+# Uncertainty in the admittance
 G.err <- sqrt((1 - Coh) / k)
 ```
+
+<!-- with(toh.cs,{ -->
+<!--   layout(matrix(1:3,nc=1)) -->
+<!--   par(mar=c(3,3,1,1), mgp=c(2,0.5,0), tcl=0.5, oma=c(2,0,0,0)) -->
+<!--   f <- freq -->
+<!--   xlim <- c(1/200,0.5) -->
+<!--   plot(f, Coh, type='l', xlim=xlim, log='x', ylim=c(0,1), ylab="Coherence") -->
+<!--   plot(f, Phi, xlim=xlim, type='l', log='x', ylab=sprintf("%sWrapped Phase, rad", ifelse(can.unwrap,'Un-',''))) -->
+<!--   abline(h=-pi, lty=2) -->
+<!--   plot(f, G, type='l', xlim=xlim, log='xy', ylab="Gain", xlab="Frequency, Hz") -->
+<!-- }) -->
 
 We can safely assume that the spectral density estimates for
 periods longer than $\approx 100$ seconds will be either
 spurious, or lacking in seismic energy, so we will exclude them.
 ```{r, echo=TRUE}
-csd <- data.frame(f, p, lf, lp, Coh, G, G.err, Phi = Phi * 180 / pi)
+csd <- data.frame(f, p, lf, Coh, k, G, G.err, Phi = Phi * 180 / pi)
 csd.f <- subset(csd, p <= 100)
-is.sig <- csd.f$Coh > coh.99
 ```
-
-
+We see that the phase and gain are quite stable across most of the seismic band,
+but coherence degrades at frequencies above $\approx$ 0.1 Hz.
+Accordingly, the uncertainty grows very large as the coherence goes
+to zero at very high frequency.
+The reason for the loss in coherence is related to the hydraulic
+diffusivity of aquifer system and the details of the well sampling 
+pressure in it.
 ```{r, echo=FALSE, fig.show='hold', fig.width=6., fig.height=6.5}
-unwrap.phase.lower <- function(p, thresh=0) {
-  while (any(p <= thresh)){
-    inds <- p <= thresh
-    p[inds] <- p[inds] + 360
-  }
-  return(p)
-}
 
-layout(matrix(1:3), heights=c(1.3,2,2))
-par(mar=c(1, 3, 0.0, 0.1), oma=c(4,0.1,2,0.1), cex=0.8, las=1)
+layout(matrix(1:3), heights=c(2,2,1.5))
+par(oma=c(1,1,3,1), cex=0.8, las=1, tcl=-0.2, mgp=c(2,0.3,0))
 
-plot(Coh ~ lf, csd.f, type='l', xaxt='n', ylim=c(0,1), 
-     xaxs='i',
+par(mar=c(0.1, 4, 1, 4))
+plot(Coh ~ f, csd.f, 
+     log='x',
+     xlab='', ylab='',
+     type='l', xaxt='n', 
+     ylim=c(-0.6,1), 
+     xaxs='i', yaxt='n',
      yaxs='i', frame=FALSE)
-mtext('Coherence', font=2, line=-2.5, adj=0.1)
-mtext(parse(text=sprintf("over(%s ~ 'tapers', 'conf.:' ~ %s)", k, coh.99)), cex=0.9, adj=0.95, line=-1.8, col='cyan4')
-axis(1, at=-3:1, labels=FALSE)
+abline(h=c(0,1), lty=3)
+mtext('Coherence', font=2, line=-2.5, adj=0.3)
+mtext('No. tapers', side=1, font=3, line=-2.7, adj=0.2)
+axis(2, at=seq(0,1,by=0.2))
+#axis(1, col=NA, col.ticks=1, labels=FALSE)
+axis(3, col=NA, col.ticks=1)
+title("Cross Spectrum: Pressure from Strain (Tohoku M9)", outer=TRUE)
+par(new=TRUE)
+plot(K, xaxs='i', yaxs='i', axes=FALSE, ylim=c(0,1000),xlab='', ylab='')
+axis(4, at=seq(0,300,by=100))
+par(new=FALSE)
+box()
 
-plot(G ~ lf, csd.f, type='l', 
-     yaxt='n', xaxt='n', col=NA, frame=FALSE,
-     xaxs='i', yaxs='i', ylim=c(0.0, 1.01*max(pretty(csd.f$G))))
-axis(1, at=csd.f$lf, tcl=0.3, col=NA, col.ticks='grey', labels = FALSE, line=0)
-nsig <- 3
+par(mar=c(0.1, 4, 0, 4))
+nsig <- 2
 with(csd.f, {
-  polygon(c(lf,rev(lf)), c(G + nsig*G.err, rev(G - nsig*G.err)), col='cyan', border=NA)
+  lG <- log10(G)
+  Delt <- nsig*log10(exp(1))*G.err/G
+  Upper <- lG + Delt
+  Lower <- lG - Delt
+  ylim <- range(c(lG)) + log10(2)*c(-1,2)
+  plot(f, lG, type='l', 
+       log='x',
+       yaxt='n', xlab='', ylab='',
+       xaxt='n', 
+       col=NA, frame=FALSE,
+       xaxs='i', yaxs='i', ylim=ylim)
+  polygon(c(f, rev(f)), c(Upper, rev(Lower)), col='lightcyan', border='lightgrey')
+  lmsc <- log10(abs(strain_scaling))
+  abline(h=lmsc, col=2, lty=2)
+  mtext("scaling\nfrom lm", side=4, at=lmsc, col=2, line=0.2, font=3)
+  lines(f, lG)
 })
-lines(G ~ lf, csd.f)
-#dg <- round(coef(lm(output ~ input-1, as.data.frame(toh.dat))), 3)
-#abline(h=abs(dg), lty=2)
-mtext('Admittance', font=2, line=-3.3, adj=0.1)
-mtext(parse(text=sprintf("%s * sigma ~ 'uncert.'", nsig)), cex=0.9, adj=0.95, line=-2.2, col='cyan4')
-axis(1, at=-3:1, labels=FALSE)
-axis(2)
-#box()
+mtext('Admittance', font=2, line=-4.3, adj=0.3)
+mtext(parse(text=sprintf("%s * sigma ~ 'uncert.'", nsig)), cex=1, adj=0.3, line=-5.5,  col='cyan4')
+ll <- c(1,2,5)
+lbls <- c(ll/1000, ll/100, ll/10, ll, ll*10)
+ats <- log10(lbls)
+lbls[c(F,T,T)] <- ""
+axis(2, at=ats, labels=lbls)
+box()
 
-plot(Phi ~ lf, csd.f, 
-     type='l', col='lightgrey', 
+par(mar=c(1, 4, 0, 4))
+degadd <- 180
+plot(Phi + degadd ~ f, csd.f, 
+     log='x',
+     type='l', #col='lightgrey', 
+     xlab='Frequency, Hz', ylab="Degrees (<0 = lag)",
      xaxs='i', frame=FALSE,
-     ylim=181*c(0.65,1.08), 
-     yaxs='i', yaxt='n', xaxt='n')
-yat <- 180*(-2:2)/2
-abline(h=yat, lty=3)
-Phina <- unwrap.phase.lower(csd.f$Phi)
-Phina[!is.sig] <- NA
-lines(csd.f$lf, Phina)
-mtext('Phase (unwrapped)', font=2, line=-2.0, adj=0.1)
+     #yaxs='i', 
+     yaxt='n')
+
+lmphs <- 180 * sign(strain_scaling) + degadd
+abline(h=lmphs, col=2, lty=2)
+mtext("sign of\nlm coef.", side=4, at=lmphs, col=2, line=0.2, font=3)
+
+mtext(sprintf('Relative Phase',ifelse(can.unwrap," (Unwrapped)","")), font=2, line=-4.0, adj=0.3)
 axis(2)
-logticks(1, major.ticks = -3:1)
-axis(1, at=-3:1, labels=paste0("(",c(1000,100,10,1,"1/10"),'s)'), line=1.6, lwd=0)
+axis(1, at=10**(-3:1), labels=paste0("(",c(1000,100,10,1,"1/10"),'s)'), line=1.6, lwd=0)
+box()
 ```
 
-This is now implemented in the function `cross_spectrum`. In comparison with
-a Welch-type CSD -- calculated by setting `k=NULL`, the sine multitaper result is
-more accurate across the full frequency band, and does not degrade at low frequencies:
-```{r, fig.width=6., fig.height=3.5}
-TohCS <- cross_spectrum(toh.dat, k=50, verbose=FALSE)
-TohCS_welch <- cross_spectrum(toh.dat, k=NULL, verbose=FALSE) # turn off k to get a Welch overlapping csd
-plot(Admittance ~ Period, TohCS, col=NA, log='x', main="Pore Pressure from Strain: Tohoku", xlab="Period, sec")
-lines(Admittance ~ Period, TohCS_welch, col='salmon')
-lines(Admittance ~ Period, TohCS, lwd=2)
-```
+All of this functionality is available in the function `cross_spectrum`.
+<!-- In comparison with -->
+<!-- a Welch-type CSD -- calculated by setting `k=NULL`, the sine multitaper result is -->
+<!-- more accurate across the full frequency band, and does not degrade at low frequencies: -->
+<!-- ```{r, fig.width=6., fig.height=3.5} -->
+<!-- TohCS <- cross_spectrum(toh.dat, k=50, verbose=FALSE) -->
+<!-- TohCS_welch <- cross_spectrum(toh.dat, k=NULL, verbose=FALSE) # turn off k to get a Welch overlapping csd -->
+<!-- plot(Admittance ~ Period, TohCS, col=NA, log='x', main="Pore Pressure from Strain: Tohoku", xlab="Period, sec") -->
+<!-- lines(Admittance ~ Period, TohCS_welch, col='salmon') -->
+<!-- lines(Admittance ~ Period, TohCS, lwd=2) -->
+<!-- ``` -->
 
 
 ## References
+
+Barbour, A. J., (2015), Pore-Pressure Sensitivities to Dynamic Strains: Observations in Active Tectonic Regions, 
+Journal of Geophysical Research: Solid Earth, 120, 5863 — 5883,
+[DOI: 10.1002/2015JB012201](https://doi.org/10.1002/2015JB012201)
+
+Priestley, M. B. (1981), Spectral analysis and time series,
+Academic Press, New York

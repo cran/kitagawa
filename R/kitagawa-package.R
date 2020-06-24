@@ -2,11 +2,12 @@
 #' of an aquifer undergoing harmonic straining or pressurization. There are
 #' two classes of models here: (1) for sealed wells, based on the model of
 #' Kitagawa et al (2011), and (2) for open wells, based on the models of
-#' Cooper et al (1965), Hsieh et al (1987), Rojstaczer (1988), and Liu et al
-#' (1989). These models treat strain (or aquifer head) as an input to the
-#' physical system, and fluid-pressure (or water height) as the output. The
+#' Cooper et al (1965), Hsieh et al (1987), Rojstaczer (1988), Liu et al
+#' (1989), and Wang et al (2018). These models treat strain (or aquifer head) as 
+#' an input to the physical system, and fluid-pressure (or water height) as the output. The
 #' applicable frequency band of these models is characteristic of seismic
 #' waves, atmospheric pressure fluctuations, and solid earth tides.
+#' The Wang et al (2018) can explicitly model vertical leakage.
 #' 
 #' @details
 #' The following functions provide the primary features of the package:
@@ -43,9 +44,12 @@
 #' The solution to this PDE, with periodic discharge boundary conditions,
 #' gives the amplitude and phase response we wish to calculate.
 #' The solution  for an open well was presented by
-#' Cooper et al (1965), and subsequently modified by Liu et al (1989).
+#' Cooper et al (1965), and subsequently modified by Liu et al (1989). 
+#' Wang et al (2018) modified this solution for the leaky aquifer case.
 #' Kitagawa et al (2011) adapted the solution
 #' of Hsieh et al (1987) for the case of a sealed well.
+#' When there is no leakage, Wang et al (2018) is
+#' equivalent to Hsieh et al (1987).
 #' 
 #' These models are applicable to any quasi-static process involving harmonic, 
 #' volumetric strain of an aquifer 
@@ -59,8 +63,9 @@
 #' @name kitagawa-package
 #' @aliases kitagawa
 #' @title Spectral Response of Water Wells to Harmonic Strain and Pressure Signals
-#' @author Andrew J. Barbour <andy.barbour@@gmail.com> 
+#' @author Andrew J. Barbour <andy.barbour@@gmail.com> with contributions from Jonathan Kennel
 #' 
+#' @importFrom Bessel BesselK
 #' @importFrom kelvin Keir Beir
 #' @importFrom graphics abline axis layout lines mtext par plot
 #' @importFrom utils head str tail
@@ -91,8 +96,13 @@
 #' Poroelastic techniques in the study of earthquake-related hydrologic phenomena,
 #' \emph{Advances in Geophysics}, \strong{37}
 #' 
-#' @seealso \code{\link{well_response}}, 
+#' @references Wang C.-Y., Doan, M.-L., Xue, L., Barbour, A. (2018),
+#' Tidal Response of Groundwater in a Leaky Aquifer—Application to Oklahoma,
+#' \emph{Water Resour. Res.}, \strong{54} (10) 
+#' 
+#' @seealso 
 #' \code{\link{open_well_response}}, 
+#' \code{\link{well_response}}, 
 #' \code{\link{sensing_volume}}, 
 #' \code{\link{wrsp-methods}}
 NULL
@@ -104,6 +114,7 @@ NULL
   water=list( density=1000, bulkmod=2.2e9 ),
   gravity=9.80665
 )
+
 
 #
 # Datasets, etc

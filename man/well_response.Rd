@@ -7,9 +7,23 @@
 \usage{
 well_response(omega, T., S., Vw., Rs., Ku., B., ...)
 
-\method{well_response}{default}(omega, T., S., Vw., Rs., Ku., B., Avs, Aw,
-  rho, Kf, grav, freq.units = c("rad_per_sec", "Hz"),
-  as.pressure = TRUE, ...)
+\method{well_response}{default}(
+  omega,
+  T.,
+  S.,
+  Vw.,
+  Rs.,
+  Ku.,
+  B.,
+  Avs,
+  Aw,
+  rho,
+  Kf,
+  grav,
+  freq.units = c("rad_per_sec", "Hz"),
+  as.pressure = TRUE,
+  ...
+)
 }
 \arguments{
 \item{omega}{frequency, (see \code{freq.units})}
@@ -43,7 +57,7 @@ well_response(omega, T., S., Vw., Rs., Ku., B., ...)
 \item{as.pressure}{logical; should the response for water pressure? (default is water height)}
 }
 \value{
-An object with class 'wrsp'
+An object with class \code{'wrsp'}
 }
 \description{
 This is the primary function to calculate the response
@@ -103,12 +117,17 @@ Vw.=Volw, Rs.=Rs, Ku.=40e9, B.=0.2, freq.units="Hz"))
 plot(Rsp)
 
 }
+\references{
+See \code{\link{kitagawa-package}} for references and more background.
+}
 \seealso{
-\code{\link{wrsp-methods}} for a description of the class 'wrsp' and its methods,
+\code{\link{open_well_response}} for the open-well equivalents
+\code{\link{wrsp-methods}} for a description of the class \code{'wrsp'} and its methods,
 \code{\link{sensing_volume}} to easily estimate the volume \code{Vw.}, and
 \code{\link{kitagawa-package}} for references and more background.
 
-Other WellResponseFunctions: \code{\link{open_well_response}}
+Other WellResponseFunctions: 
+\code{\link{open_well_response}()}
 }
 \author{
 A. J. Barbour
