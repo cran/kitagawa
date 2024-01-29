@@ -1,7 +1,7 @@
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 library(kitagawa)
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 library(psd)
 data(Tohoku)
 toh_orig <- with(subset(Tohoku, epoch=='seismic'), {
@@ -13,25 +13,25 @@ toh_orig <- with(subset(Tohoku, epoch=='seismic'), {
 colnames(toh_orig) <- c('input','output')
 toh.dat <- window(ts(toh_orig), 100, 2400)
 
-## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5---------------
+## ----echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5----------------
 library(RColorBrewer)
 Set1 <- brewer.pal(8, 'Set1')
 par(mar=c(3,3,0.2,0.2))
 plot(toh.dat, yax.flip = TRUE, main="Strain and Pressure: 2011 M9 Tohoku")
 
-## ---- echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5---------------
+## ----echo=FALSE, fig.show='hold', fig.width=7., fig.height=4.5----------------
 windat <- scale(window(toh.dat, 1400, 1600))
 plot(windat[,'input'], lty=5, type='l', ylab='', main='Rescaled Input and Output')
 lines(-windat[,'output'], col=2, lwd=1.5)
 lines(as.vector(time(windat)), scale(apply(windat,1, function(x){x <- abs(x); atan2(x[1],x[2])}))/2, lty=1, col=4)
 legend('topleft', c('Input strain','Output pressure','Internal angle'), col=c(1,2,4), lty=c(2,1,1), lwd=c(1,1.5,1))
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 m <- lm(output ~ input - 1, as.data.frame(toh.dat))
 strain_scaling <- coef(m)
 signif(strain_scaling, 3) # GPa/strain
 
-## ---- echo=FALSE, fig.show='hold', fig.width=4.5, fig.height=4.5--------------
+## ----echo=FALSE, fig.show='hold', fig.width=4.5, fig.height=4.5---------------
 IO <- as.matrix(toh.dat)
 plot(IO[,1], IO[,2], 
      asp=1, col=NA, 
@@ -48,7 +48,7 @@ gam <- seq(0.001, 1, by=0.001)
 gamrat <- 2 * gam / (1 - gam)
 Pgam <- pf(k*gamrat, 2, 4*k)
 
-## ---- echo=FALSE, fig.show='hold', fig.width=5.5, fig.height=4.5--------------
+## ----echo=FALSE, fig.show='hold', fig.width=5.5, fig.height=4.5---------------
 k2 <- 100
 Pgam2 <- pf(k2*gamrat, 2, 4*k2)
 k3 <- 10
@@ -62,17 +62,17 @@ lines(x.g, Pgam2, lty=5)
 lines(x.g, Pgam3, lty=2)
 legend('bottomright', parse(text=c(sprintf("k==%s",c(k,k2,k3)))), lty=c(1,5,2))
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 #!order_matters
 class(toh.dat)
 toh_to_pspec <- toh.dat[,c('input','output')]
 toh.cs <- psd::pspectrum(toh_to_pspec, ntap.init=k, verbose=FALSE)
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 class(toh.cs)
 str(toh.cs)
 
-## ---- echo=TRUE, fig.show='hold', fig.width=5., fig.height=7------------------
+## ----echo=TRUE, fig.show='hold', fig.width=5., fig.height=7-------------------
 
 f <- as.vector(toh.cs[['freq']]) # frequency
 lf <- log10(f)
@@ -96,11 +96,11 @@ k <- as.numeric(K)
 # Uncertainty in the admittance
 G.err <- sqrt((1 - Coh) / k)
 
-## ---- echo=TRUE---------------------------------------------------------------
+## ----echo=TRUE----------------------------------------------------------------
 csd <- data.frame(f, p, lf, Coh, k, G, G.err, Phi = Phi * 180 / pi)
 csd.f <- subset(csd, p <= 100)
 
-## ---- echo=FALSE, fig.show='hold', fig.width=6., fig.height=6.5---------------
+## ----echo=FALSE, fig.show='hold', fig.width=6., fig.height=6.5----------------
 
 layout(matrix(1:3), heights=c(2,2,1.5))
 par(oma=c(1,1,3,1), cex=0.8, las=1, tcl=-0.2, mgp=c(2,0.3,0))

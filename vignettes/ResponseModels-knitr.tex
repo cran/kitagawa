@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass[12pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
 % maxwidth is the original width if it is less than linewidth
 % otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -53,7 +53,7 @@
 %
 %\makeatletter
 % \VignetteIndexEntry{Comparison of response functions}
-% \VignetteEngine{knitr}
+% \VignetteEngine{knitr::knitr}
 %\makeatother
 %
 
@@ -85,6 +85,7 @@
     \today
 }
 %
+
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
 
@@ -192,9 +193,9 @@ Setup some constants:
 \hlstd{Rs.} \hlkwb{<-} \hlnum{0.135}  \hlcom{# Radius of screened portion of well [m]}
 \hlstd{Ls.} \hlkwb{<-} \hlnum{15}  \hlcom{# Length of screened portion of well [m]}
 \hlstd{Vw.} \hlkwb{<-} \hlkwd{sensing_volume}\hlstd{(Rc., Lc., Rs., Ls.)}  \hlcom{# volume of fluid [m**3]}
-\hlcom{# parameters assumed by well_response: rho=1000 # density of rock}
-\hlcom{# [kg/m**3] Kf=2.2e9 # Bulk modulus of fluid [Pascals] grav=9.81 #}
-\hlcom{# gravitational acceleration [m/s**2]}
+\hlcom{# parameters assumed by well_response: \textbackslash{}trho=1000\textbackslash{}t\textbackslash{}t# density of}
+\hlcom{# rock [kg/m**3] \textbackslash{}tKf=2.2e9\textbackslash{}t\textbackslash{}t# Bulk modulus of fluid [Pascals]}
+\hlcom{# \textbackslash{}tgrav=9.81\textbackslash{}t# gravitational acceleration [m/s**2]}
 \hlstd{rhog} \hlkwb{<-} \hlnum{9.81} \hlopt{*} \hlnum{1000}
 \hlcom{# Kitagawa Fig 7: Ku B / Kw Aw = 3 => Aw==4.8 at 40GPa}
 \hlstd{Ku.} \hlkwb{<-} \hlnum{4e+10}  \hlcom{# Bulk modulus [Pascals]}
@@ -257,7 +258,6 @@ And onto the response functions...
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/KITRESPFIG-1} 
-
 \end{knitrout}
 \caption{The response of a sealed well to harmonic areal strain using
 the Kitagawa model. The amplitude is normalized by Skempton's coefficient $B$
@@ -295,7 +295,6 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/COOPERRESPFIG-1} 
-
 \end{knitrout}
 \caption{The response of an open well to harmonic areal strain using
 the Cooper model. 
@@ -330,7 +329,6 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/HSIEHRESPFIG-1} 
-
 \end{knitrout}
 \caption{The response of an open well to harmonic areal strain using
 the Hsieh model. 
@@ -365,7 +363,6 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/LIURESPFIG-1} 
-
 \end{knitrout}
 \caption{The response of an open well to harmonic areal strain using
 the Liu model. 
@@ -416,7 +413,6 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/WANGRESPFIG-1} 
-
 \end{knitrout}
 \caption{Amplitude and phase shift as a function of the specific leakage (K'/b') using the Wang 2018 model for the M2 tide.}
 \label{fig:owrsp-wang}
@@ -450,7 +446,6 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/ROJRESPFIG-1} 
-
 \end{knitrout}
 \caption{The response of an open well to harmonic areal strain using
 the Rojstaczer model. In the phase curve, phase wrapping has been removed.
@@ -471,7 +466,6 @@ $D$.}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/ALLRESPFIG-1} 
-
 \end{knitrout}
 \caption{A comparison of well responses to harmonic strain. 
 The phase of the water level is relative to $-180^\circ$ the phase of strain.}
@@ -486,7 +480,6 @@ The phase of the water level is relative to $-180^\circ$ the phase of strain.}
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \includegraphics[width=\maxwidth]{figure/ALLORESPFIG-1} 
-
 \end{knitrout}
 \caption{A comparison of well responses to harmonic pressure-head, 
 from \citet{cooper1965, hsieh1987, liu1989} (all for unsealed).}
