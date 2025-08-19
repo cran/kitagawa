@@ -13,10 +13,10 @@
 
 \definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
 \newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlsng}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
 \newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
 \newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hldef}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
 \newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
 \newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
 \newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
@@ -168,10 +168,10 @@ Load the necessary packages:
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{library}\hlstd{(RColorBrewer)}
-\hlstd{Set1} \hlkwb{<-} \hlkwd{brewer.pal}\hlstd{(}\hlnum{8}\hlstd{,} \hlstr{"Set1"}\hlstd{)}
-\hlkwd{library}\hlstd{(signal,} \hlkwc{warn.conflicts} \hlstd{=} \hlnum{FALSE}\hlstd{)}
-\hlkwd{library}\hlstd{(kitagawa)}
+\hlkwd{library}\hldef{(RColorBrewer)}
+\hldef{Set1} \hlkwb{<-} \hlkwd{brewer.pal}\hldef{(}\hlnum{8}\hldef{,} \hlsng{"Set1"}\hldef{)}
+\hlkwd{library}\hldef{(signal,} \hlkwc{warn.conflicts} \hldef{=} \hlnum{FALSE}\hldef{)}
+\hlkwd{library}\hldef{(kitagawa)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -181,25 +181,25 @@ Setup some constants:
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{S.} \hlkwb{<-} \hlnum{1e-05}  \hlcom{# Storativity [nondimensional]}
-\hlstd{T.} \hlkwb{<-} \hlnum{1e-04}  \hlcom{# Transmissivity [m**2 / s]}
-\hlstd{D.} \hlkwb{<-} \hlstd{T.}\hlopt{/}\hlstd{S.}  \hlcom{# Diffusivity [m**2 / s]}
-\hlstd{Ta} \hlkwb{<-} \hlnum{50}  \hlcom{# Aquifer thickness [m] #100}
-\hlstd{Hw} \hlkwb{<-} \hlstd{z} \hlkwb{<-} \hlnum{50}  \hlcom{# Depth to water table [m] #10}
+\hldef{S.} \hlkwb{<-} \hlnum{1e-05}  \hlcom{# Storativity [nondimensional]}
+\hldef{T.} \hlkwb{<-} \hlnum{1e-04}  \hlcom{# Transmissivity [m**2 / s]}
+\hldef{D.} \hlkwb{<-} \hldef{T.}\hlopt{/}\hldef{S.}  \hlcom{# Diffusivity [m**2 / s]}
+\hldef{Ta} \hlkwb{<-} \hlnum{50}  \hlcom{# Aquifer thickness [m] #100}
+\hldef{Hw} \hlkwb{<-} \hldef{z} \hlkwb{<-} \hlnum{50}  \hlcom{# Depth to water table [m] #10}
 
 \hlcom{# Using ANO1 stats from Kit Tbl 1}
-\hlstd{Rc.} \hlkwb{<-} \hlnum{0.075}  \hlcom{# Radius of cased portion of well [m]}
-\hlstd{Lc.} \hlkwb{<-} \hlnum{570}  \hlcom{# Length of cased portion of well [m]}
-\hlstd{Rs.} \hlkwb{<-} \hlnum{0.135}  \hlcom{# Radius of screened portion of well [m]}
-\hlstd{Ls.} \hlkwb{<-} \hlnum{15}  \hlcom{# Length of screened portion of well [m]}
-\hlstd{Vw.} \hlkwb{<-} \hlkwd{sensing_volume}\hlstd{(Rc., Lc., Rs., Ls.)}  \hlcom{# volume of fluid [m**3]}
+\hldef{Rc.} \hlkwb{<-} \hlnum{0.075}  \hlcom{# Radius of cased portion of well [m]}
+\hldef{Lc.} \hlkwb{<-} \hlnum{570}  \hlcom{# Length of cased portion of well [m]}
+\hldef{Rs.} \hlkwb{<-} \hlnum{0.135}  \hlcom{# Radius of screened portion of well [m]}
+\hldef{Ls.} \hlkwb{<-} \hlnum{15}  \hlcom{# Length of screened portion of well [m]}
+\hldef{Vw.} \hlkwb{<-} \hlkwd{sensing_volume}\hldef{(Rc., Lc., Rs., Ls.)}  \hlcom{# volume of fluid [m**3]}
 \hlcom{# parameters assumed by well_response: \textbackslash{}trho=1000\textbackslash{}t\textbackslash{}t# density of}
 \hlcom{# rock [kg/m**3] \textbackslash{}tKf=2.2e9\textbackslash{}t\textbackslash{}t# Bulk modulus of fluid [Pascals]}
 \hlcom{# \textbackslash{}tgrav=9.81\textbackslash{}t# gravitational acceleration [m/s**2]}
-\hlstd{rhog} \hlkwb{<-} \hlnum{9.81} \hlopt{*} \hlnum{1000}
+\hldef{rhog} \hlkwb{<-} \hlnum{9.81} \hlopt{*} \hlnum{1000}
 \hlcom{# Kitagawa Fig 7: Ku B / Kw Aw = 3 => Aw==4.8 at 40GPa}
-\hlstd{Ku.} \hlkwb{<-} \hlnum{4e+10}  \hlcom{# Bulk modulus [Pascals]}
-\hlstd{B.} \hlkwb{<-} \hlnum{0.5}  \hlcom{# Skemptons ratio [nondimensional]}
+\hldef{Ku.} \hlkwb{<-} \hlnum{4e+10}  \hlcom{# Bulk modulus [Pascals]}
+\hldef{B.} \hlkwb{<-} \hlnum{0.5}  \hlcom{# Skemptons ratio [nondimensional]}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -212,19 +212,19 @@ where $D$ is the hydraulic diffusivity:
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# Frequencies}
-\hlstd{Q} \hlkwb{<-} \hlnum{10}\hlopt{^}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{5}\hlstd{,} \hlnum{2}\hlstd{,} \hlkwc{by} \hlstd{=} \hlnum{0.05}\hlstd{)}  \hlcom{# [nondimensional]}
-\hlstd{lQ} \hlkwb{<-} \hlkwd{log10}\hlstd{(Q)}
-\hlstd{omega} \hlkwb{<-} \hlkwd{omega_norm}\hlstd{(Q, z, D.,} \hlkwc{invert} \hlstd{=} \hlnum{TRUE}\hlstd{)}  \hlcom{# [Hz]}
+\hldef{Q} \hlkwb{<-} \hlnum{10}\hlopt{^}\hlkwd{seq}\hldef{(}\hlopt{-}\hlnum{5}\hldef{,} \hlnum{2}\hldef{,} \hlkwc{by} \hldef{=} \hlnum{0.05}\hldef{)}  \hlcom{# [nondimensional]}
+\hldef{lQ} \hlkwb{<-} \hlkwd{log10}\hldef{(Q)}
+\hldef{omega} \hlkwb{<-} \hlkwd{omega_norm}\hldef{(Q, z, D.,} \hlkwc{invert} \hldef{=} \hlnum{TRUE}\hldef{)}  \hlcom{# [Hz]}
 
-\hlstd{Phase} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{Z}\hlstd{) \{}
-    \hlstd{Phs.} \hlkwb{<-} \hlkwd{Arg}\hlstd{(Z)}  \hlcom{# will wrap to -pi/pi}
-    \hlstd{uPhs.} \hlkwb{<-} \hlstd{signal}\hlopt{::}\hlkwd{unwrap}\hlstd{(Phs.,} \hlkwc{tol} \hlstd{= pi}\hlopt{/}\hlnum{30}\hlstd{)}
-    \hlkwd{return}\hlstd{(}\hlkwd{data.frame}\hlstd{(}\hlkwc{Phs} \hlstd{= Phs.,} \hlkwc{uPhs} \hlstd{= uPhs.))}
-\hlstd{\}}
+\hldef{Phase} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{Z}\hldef{) \{}
+    \hldef{Phs.} \hlkwb{<-} \hlkwd{Arg}\hldef{(Z)}  \hlcom{# will wrap to -pi/pi}
+    \hldef{uPhs.} \hlkwb{<-} \hldef{signal}\hlopt{::}\hlkwd{unwrap}\hldef{(Phs.,} \hlkwc{tol} \hldef{= pi}\hlopt{/}\hlnum{30}\hldef{)}
+    \hlkwd{return}\hldef{(}\hlkwd{data.frame}\hldef{(}\hlkwc{Phs} \hldef{= Phs.,} \hlkwc{uPhs} \hldef{= uPhs.))}
+\hldef{\}}
 
 \hlcom{# Responses converted to pressure if TRUE}
-\hlstd{asP} \hlkwb{<-} \hlnum{FALSE}
-\hlstd{ZasP} \hlkwb{<-} \hlnum{FALSE}
+\hldef{asP} \hlkwb{<-} \hlnum{FALSE}
+\hldef{ZasP} \hlkwb{<-} \hlnum{FALSE}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -239,16 +239,16 @@ And onto the response functions...
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{Vw.} \hlstd{= Vw.,} \hlkwc{Rs.} \hlstd{= Rs.,} \hlkwc{Ku.} \hlstd{= Ku.,}
-    \hlkwc{B.} \hlstd{= B.,} \hlkwc{Avs} \hlstd{=} \hlnum{1}\hlstd{,} \hlkwc{Aw} \hlstd{=} \hlnum{1}\hlstd{,} \hlkwc{as.pressure} \hlstd{= asP)}
-\hlkwd{plot}\hlstd{(wrsp)}  \hlcom{# uses plot.wrsp method}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{Vw.} \hldef{= Vw.,} \hlkwc{Rs.} \hldef{= Rs.,} \hlkwc{Ku.} \hldef{= Ku.,}
+    \hlkwc{B.} \hldef{= B.,} \hlkwc{Avs} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{Aw} \hldef{=} \hlnum{1}\hldef{,} \hlkwc{as.pressure} \hldef{= asP)}
+\hlkwd{plot}\hldef{(wrsp)}  \hlcom{# uses plot.wrsp method}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/KITRESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}  \hlcom{# Complex response}
-\hlstd{kGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}\hlopt{/}\hlstd{Ku.}\hlopt{/}\hlstd{B.}  \hlcom{# Amplitude (or Gain)}
-\hlstd{kP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}  \hlcom{# Phase}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}  \hlcom{# Complex response}
+\hldef{kGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}\hlopt{/}\hldef{Ku.}\hlopt{/}\hldef{B.}  \hlcom{# Amplitude (or Gain)}
+\hldef{kP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}  \hlcom{# Phase}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -276,16 +276,16 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{Ta} \hlstd{= Ta,} \hlkwc{Hw} \hlstd{= Hw,}
-    \hlkwc{model} \hlstd{=} \hlstr{"cooper"}\hlstd{,} \hlkwc{as.pressure} \hlstd{= ZasP)}
-\hlkwd{plot}\hlstd{(wrsp)}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{Ta} \hldef{= Ta,} \hlkwc{Hw} \hldef{= Hw,}
+    \hlkwc{model} \hldef{=} \hlsng{"cooper"}\hldef{,} \hlkwc{as.pressure} \hldef{= ZasP)}
+\hlkwd{plot}\hldef{(wrsp)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/COOPERRESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}
-\hlstd{cGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}
-\hlstd{cP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}
+\hldef{cGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}
+\hldef{cP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -310,16 +310,16 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{Ta} \hlstd{= Ta,} \hlkwc{Hw} \hlstd{= Hw,}
-    \hlkwc{model} \hlstd{=} \hlstr{"hsieh"}\hlstd{,} \hlkwc{as.pressure} \hlstd{= ZasP)}
-\hlkwd{plot}\hlstd{(wrsp)}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{Ta} \hldef{= Ta,} \hlkwc{Hw} \hldef{= Hw,}
+    \hlkwc{model} \hldef{=} \hlsng{"hsieh"}\hldef{,} \hlkwc{as.pressure} \hldef{= ZasP)}
+\hlkwd{plot}\hldef{(wrsp)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/HSIEHRESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}
-\hlstd{hGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}
-\hlstd{hP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}
+\hldef{hGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}
+\hldef{hP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -344,16 +344,16 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{Ta} \hlstd{= Ta,} \hlkwc{Hw} \hlstd{= Hw,}
-    \hlkwc{model} \hlstd{=} \hlstr{"liu"}\hlstd{,} \hlkwc{as.pressure} \hlstd{= ZasP)}
-\hlkwd{plot}\hlstd{(wrsp)}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{Ta} \hldef{= Ta,} \hlkwc{Hw} \hldef{= Hw,}
+    \hlkwc{model} \hldef{=} \hlsng{"liu"}\hldef{,} \hlkwc{as.pressure} \hldef{= ZasP)}
+\hlkwd{plot}\hldef{(wrsp)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/LIURESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}
-\hlstd{lGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}
-\hlstd{lP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}
+\hldef{lGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}
+\hldef{lP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -380,16 +380,16 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{leak} \hlstd{=} \hlnum{1e-08}\hlstd{,} \hlkwc{model} \hlstd{=} \hlstr{"wang"}\hlstd{,}
-    \hlkwc{as.pressure} \hlstd{= asP)}
-\hlkwd{plot}\hlstd{(wrsp)}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{leak} \hldef{=} \hlnum{1e-08}\hldef{,} \hlkwc{model} \hldef{=} \hlsng{"wang"}\hldef{,}
+    \hlkwc{as.pressure} \hldef{= asP)}
+\hlkwd{plot}\hldef{(wrsp)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/WANGRESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}
-\hlstd{rGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}
-\hlstd{rP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}
+\hldef{rGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}
+\hldef{rP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -400,10 +400,10 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{Transmiss} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{0.01}\hlstd{,} \hlnum{1e-04}\hlstd{,} \hlnum{1e-06}\hlstd{,} \hlnum{1e-08}\hlstd{)}
-\hlstd{Storativ} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{0.01}\hlstd{,} \hlnum{1e-04}\hlstd{,} \hlnum{1e-06}\hlstd{,} \hlnum{1e-08}\hlstd{)}
-\hlstd{omeg} \hlkwb{<-} \hlnum{1.9322736}\hlopt{/}\hlnum{86400}  \hlcom{# M2 in Hz}
-\hlstd{leak} \hlkwb{<-} \hlnum{10}\hlopt{^}\hlkwd{seq}\hlstd{(}\hlopt{-}\hlnum{11}\hlstd{,} \hlopt{-}\hlnum{3}\hlstd{,} \hlnum{0.2}\hlstd{)}
+\hldef{Transmiss} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlnum{1}\hldef{,} \hlnum{0.01}\hldef{,} \hlnum{1e-04}\hldef{,} \hlnum{1e-06}\hldef{,} \hlnum{1e-08}\hldef{)}
+\hldef{Storativ} \hlkwb{<-} \hlkwd{c}\hldef{(}\hlnum{0.01}\hldef{,} \hlnum{1e-04}\hldef{,} \hlnum{1e-06}\hldef{,} \hlnum{1e-08}\hldef{)}
+\hldef{omeg} \hlkwb{<-} \hlnum{1.9322736}\hlopt{/}\hlnum{86400}  \hlcom{# M2 in Hz}
+\hldef{leak} \hlkwb{<-} \hlnum{10}\hlopt{^}\hlkwd{seq}\hldef{(}\hlopt{-}\hlnum{11}\hldef{,} \hlopt{-}\hlnum{3}\hldef{,} \hlnum{0.2}\hldef{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -427,16 +427,16 @@ Frequency is dimensionless, based on the well-depth $z$ and the diffusivity $D$.
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hlstd{(omega,} \hlkwc{T.} \hlstd{= T.,} \hlkwc{S.} \hlstd{= S.,} \hlkwc{z} \hlstd{= z,} \hlkwc{model} \hlstd{=} \hlstr{"rojstaczer"}\hlstd{,}
-    \hlkwc{as.pressure} \hlstd{= asP)}
-\hlkwd{plot}\hlstd{(wrsp)}
+\hldef{wrsp} \hlkwb{<-} \hlkwd{open_well_response}\hldef{(omega,} \hlkwc{T.} \hldef{= T.,} \hlkwc{S.} \hldef{= S.,} \hlkwc{z} \hldef{= z,} \hlkwc{model} \hldef{=} \hlsng{"rojstaczer"}\hldef{,}
+    \hlkwc{as.pressure} \hldef{= asP)}
+\hlkwd{plot}\hldef{(wrsp)}
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/ROJRESP-1} 
 \begin{kframe}\begin{alltt}
-\hlstd{crsp} \hlkwb{<-} \hlstd{wrsp[[}\hlstr{"Response"}\hlstd{]][,} \hlnum{2}\hlstd{]}
-\hlstd{rGain} \hlkwb{<-} \hlkwd{Mod}\hlstd{(crsp)}
-\hlstd{rP} \hlkwb{<-} \hlkwd{Phase}\hlstd{(crsp)}
+\hldef{crsp} \hlkwb{<-} \hldef{wrsp[[}\hlsng{"Response"}\hldef{]][,} \hlnum{2}\hldef{]}
+\hldef{rGain} \hlkwb{<-} \hlkwd{Mod}\hldef{(crsp)}
+\hldef{rP} \hlkwb{<-} \hlkwd{Phase}\hldef{(crsp)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}

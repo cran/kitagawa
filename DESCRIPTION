@@ -2,8 +2,8 @@ Package: kitagawa
 Type: Package
 Title: Spectral Response of Water Wells to Harmonic Strain and Pressure
         Signals
-Version: 3.1.2
-Date: 2024-01-26
+Version: 3.1.3
+Date: 2025-08-16
 Authors@R: 
     c(person(given = c("Andrew","J."),
              family = "Barbour",
@@ -43,11 +43,12 @@ Suggests: dplyr, tibble, RColorBrewer, signal, testthat, knitr,
         rmarkdown, formatR, covr
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-01-28 17:10:06 UTC; abarbour
-Author: Andrew J. Barbour [aut, cre] (<https://orcid.org/0000-0002-6890-2452>),
-  Jonathan Kennel [ctb] (<https://orcid.org/0000-0003-4474-6886>)
+Packaged: 2025-08-19 04:11:10 UTC; abarbour
+Author: Andrew J. Barbour [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-6890-2452>),
+  Jonathan Kennel [ctb] (ORCID: <https://orcid.org/0000-0003-4474-6886>)
 Maintainer: Andrew J. Barbour <andy.barbour@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-01-29 09:40:02 UTC
+Date/Publication: 2025-08-19 06:20:02 UTC
